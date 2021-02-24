@@ -1,0 +1,13 @@
+D:\ProjectFolders\600089_Distributed\600089_Labs\Server\bin\Debug\netcoreapp3.1\Server.exe
+D:\ProjectFolders\600089_Distributed\600089_Labs\Server\bin\Debug\netcoreapp3.1\Server.deps.json
+D:\ProjectFolders\600089_Distributed\600089_Labs\Server\bin\Debug\netcoreapp3.1\Server.runtimeconfig.json
+D:\ProjectFolders\600089_Distributed\600089_Labs\Server\bin\Debug\netcoreapp3.1\Server.runtimeconfig.dev.json
+D:\ProjectFolders\600089_Distributed\600089_Labs\Server\bin\Debug\netcoreapp3.1\Server.dll
+D:\ProjectFolders\600089_Distributed\600089_Labs\Server\bin\Debug\netcoreapp3.1\Server.pdb
+D:\ProjectFolders\600089_Distributed\600089_Labs\Server\obj\Debug\netcoreapp3.1\Server.csprojAssemblyReference.cache
+D:\ProjectFolders\600089_Distributed\600089_Labs\Server\obj\Debug\netcoreapp3.1\Server.AssemblyInfoInputs.cache
+D:\ProjectFolders\600089_Distributed\600089_Labs\Server\obj\Debug\netcoreapp3.1\Server.AssemblyInfo.cs
+D:\ProjectFolders\600089_Distributed\600089_Labs\Server\obj\Debug\netcoreapp3.1\Server.csproj.CoreCompileInputs.cache
+D:\ProjectFolders\600089_Distributed\600089_Labs\Server\obj\Debug\netcoreapp3.1\Server.dll
+D:\ProjectFolders\600089_Distributed\600089_Labs\Server\obj\Debug\netcoreapp3.1\Server.pdb
+D:\ProjectFolders\600089_Distributed\600089_Labs\Server\obj\Debug\netcoreapp3.1\Server.genruntimeconfig.cache
