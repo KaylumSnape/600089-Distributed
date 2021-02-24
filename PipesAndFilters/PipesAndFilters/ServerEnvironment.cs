@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using PipesAndFilters.Filters;
 using PipesAndFilters.Messages;
 using PipesAndFilters.Pipes;
@@ -32,13 +30,15 @@ namespace PipesAndFilters
         public static bool SetCurrentUser(int id)
         {
             // Find the user via provided id and set to current user.
-            foreach (var user in Users.Where(user => user.ID == id))
+            try
             {
-                CurrentUser = user; // Set the found user to be the current user.
+                CurrentUser = Users.Find(u => u.ID == id); // Set the found user to be the current user.
                 return true;
             }
-
-            return false;
+            catch
+            {
+                return false;
+            }
         }
 
         public static IMessage SendRequest(IMessage message)

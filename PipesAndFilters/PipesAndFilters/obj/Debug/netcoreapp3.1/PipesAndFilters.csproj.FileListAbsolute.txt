@@ -11,3 +11,16 @@ C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp
 C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.dll
 C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.pdb
 C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.genruntimeconfig.cache
+D:\ProjectFolders\600089_Distributed\PipesAndFilters\PipesAndFilters\bin\Debug\netcoreapp3.1\PipesAndFilters.exe
+D:\ProjectFolders\600089_Distributed\PipesAndFilters\PipesAndFilters\bin\Debug\netcoreapp3.1\PipesAndFilters.deps.json
+D:\ProjectFolders\600089_Distributed\PipesAndFilters\PipesAndFilters\bin\Debug\netcoreapp3.1\PipesAndFilters.runtimeconfig.json
+D:\ProjectFolders\600089_Distributed\PipesAndFilters\PipesAndFilters\bin\Debug\netcoreapp3.1\PipesAndFilters.runtimeconfig.dev.json
+D:\ProjectFolders\600089_Distributed\PipesAndFilters\PipesAndFilters\bin\Debug\netcoreapp3.1\PipesAndFilters.dll
+D:\ProjectFolders\600089_Distributed\PipesAndFilters\PipesAndFilters\bin\Debug\netcoreapp3.1\PipesAndFilters.pdb
+D:\ProjectFolders\600089_Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.csprojAssemblyReference.cache
+D:\ProjectFolders\600089_Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.AssemblyInfoInputs.cache
+D:\ProjectFolders\600089_Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.AssemblyInfo.cs
+D:\ProjectFolders\600089_Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.csproj.CoreCompileInputs.cache
+D:\ProjectFolders\600089_Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.dll
+D:\ProjectFolders\600089_Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.pdb
+D:\ProjectFolders\600089_Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.genruntimeconfig.cache
