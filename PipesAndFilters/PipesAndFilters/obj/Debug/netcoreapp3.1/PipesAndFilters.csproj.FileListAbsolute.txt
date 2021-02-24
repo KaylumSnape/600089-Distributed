@@ -1,0 +1,13 @@
+C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\bin\Debug\netcoreapp3.1\PipesAndFilters.exe
+C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\bin\Debug\netcoreapp3.1\PipesAndFilters.deps.json
+C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\bin\Debug\netcoreapp3.1\PipesAndFilters.runtimeconfig.json
+C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\bin\Debug\netcoreapp3.1\PipesAndFilters.runtimeconfig.dev.json
+C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\bin\Debug\netcoreapp3.1\PipesAndFilters.dll
+C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\bin\Debug\netcoreapp3.1\PipesAndFilters.pdb
+C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.csprojAssemblyReference.cache
+C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.AssemblyInfoInputs.cache
+C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.AssemblyInfo.cs
+C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.csproj.CoreCompileInputs.cache
+C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.dll
+C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.pdb
+C:\Repos\600089-Distributed\PipesAndFilters\PipesAndFilters\obj\Debug\netcoreapp3.1\PipesAndFilters.genruntimeconfig.cache

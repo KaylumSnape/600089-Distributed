@@ -6,7 +6,7 @@ namespace PipesAndFilters.Pipes
     public interface IPipe
     {
         public void RegisterFilter(IFilter iFilter);
-        public void ProcessMessages(IMessage iMessage);
+        public IMessage ProcessMessage(IMessage iMessage);
 
     }
 }

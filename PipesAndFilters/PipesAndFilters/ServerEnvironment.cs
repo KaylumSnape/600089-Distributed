@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using PipesAndFilters.Filters;
+using PipesAndFilters.Messages;
+using PipesAndFilters.Pipes;
 
 namespace PipesAndFilters
 {
@@ -14,11 +18,27 @@ namespace PipesAndFilters
         public static void Setup()
         {
             Users = new List<User> {new User() {ID = 1, Name = "Test User"}};
+            IncomingPipe = new Pipe();
+            OutgoingPipe = new Pipe();
+            
+            IncomingPipe.RegisterFilter(new AuthenticateFilter());
+            IncomingPipe.RegisterFilter(new TranslateFilter());
+
+            OutgoingPipe.RegisterFilter(new TranslateFilter());
+            OutgoingPipe.RegisterFilter(new TimestampFilter());
+
         }
 
         public static bool SetCurrentUser(int id)
         {
+            // Find the user via provided id and set to current user.
+            foreach (var user in Users.Where(user => user.ID == id))
+            {
+                CurrentUser = user; // Set the found user to be the current user.
+                return true;
+            }
 
+            return false;
         }
 
         public static IMessage SendRequest(IMessage message)

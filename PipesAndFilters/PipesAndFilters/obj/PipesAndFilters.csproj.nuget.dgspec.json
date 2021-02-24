@@ -1,26 +1,21 @@
 {
   "format": 1,
   "restore": {
-    "D:\\ProjectFolders\\600089_Distributed\\PipesAndFilters\\PipesAndFilters\\PipesAndFilters.csproj": {}
+    "C:\\Repos\\600089-Distributed\\PipesAndFilters\\PipesAndFilters\\PipesAndFilters.csproj": {}
   },
   "projects": {
-    "D:\\ProjectFolders\\600089_Distributed\\PipesAndFilters\\PipesAndFilters\\PipesAndFilters.csproj": {
+    "C:\\Repos\\600089-Distributed\\PipesAndFilters\\PipesAndFilters\\PipesAndFilters.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\ProjectFolders\\600089_Distributed\\PipesAndFilters\\PipesAndFilters\\PipesAndFilters.csproj",
+        "projectUniqueName": "C:\\Repos\\600089-Distributed\\PipesAndFilters\\PipesAndFilters\\PipesAndFilters.csproj",
         "projectName": "PipesAndFilters",
-        "projectPath": "D:\\ProjectFolders\\600089_Distributed\\PipesAndFilters\\PipesAndFilters\\PipesAndFilters.csproj",
-        "packagesPath": "C:\\Users\\kaylum\\.nuget\\packages\\",
-        "outputPath": "D:\\ProjectFolders\\600089_Distributed\\PipesAndFilters\\PipesAndFilters\\obj\\",
+        "projectPath": "C:\\Repos\\600089-Distributed\\PipesAndFilters\\PipesAndFilters\\PipesAndFilters.csproj",
+        "packagesPath": "C:\\Users\\kaylu\\.nuget\\packages\\",
+        "outputPath": "C:\\Repos\\600089-Distributed\\PipesAndFilters\\PipesAndFilters\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Microsoft\\Xamarin\\NuGet\\",
-          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
-        ],
         "configFilePaths": [
-          "C:\\Users\\kaylum\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+          "C:\\Users\\kaylu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp3.1"

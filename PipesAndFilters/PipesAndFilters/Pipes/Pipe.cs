@@ -10,6 +10,9 @@ namespace PipesAndFilters.Pipes
     {
         private List<IFilter> Filters;
 
+        public Pipe()
+        { }
+
         public Pipe(List<IFilter> filters)
         {
             Filters = filters;
@@ -21,14 +24,17 @@ namespace PipesAndFilters.Pipes
         }
 
          
-        public void ProcessMessages(IMessage iMessage)
+        public IMessage ProcessMessage(IMessage iMessage)
         {
             // Sequentially pass the supplied IMessage through each filter in the Filters List.
             foreach (var filter in Filters)
             {
                 filter.Run(iMessage);
             }
-            // TODO Return the message passed back by the final filter.
+
+            // Don't think this is returning the message that's been through the filter.
+            // Return the message passed back by the final filter.
+            return iMessage;
         }
     }
 }

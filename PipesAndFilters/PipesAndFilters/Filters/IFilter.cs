@@ -4,6 +4,6 @@ namespace PipesAndFilters.Filters
 {
     public interface IFilter
     {
-        public IMessage Run(IMessage message);
+        public IMessage Run(IMessage iMessage);
     }
 }
