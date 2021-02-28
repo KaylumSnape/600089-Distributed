@@ -51,9 +51,6 @@ namespace PipesAndFilters
                 case 3:
                     HexEncoding(message, requestMessage);
                     break;
-                default:
-                break;
-
             }
         }
 
@@ -93,6 +90,7 @@ namespace PipesAndFilters
             Console.WriteLine($"At {timestamp} Response was: {responseBody}");
         }
 
+        // Encode the request message in binary.
         internal void BinaryEncoding(IMessage message, string requestMessage)
         {
             message.Headers.Add("RequestFormat", "Binary");
@@ -127,7 +125,35 @@ namespace PipesAndFilters
 
         internal void HexEncoding(IMessage message, string requestMessage)
         {
-            throw new NotImplementedException();
+            message.Headers.Add("RequestFormat", "Hex");
+            var sb = new StringBuilder();
+
+            var bytes = Encoding.Unicode.GetBytes(requestMessage);
+            foreach (var t in bytes)
+            {
+                sb.Append(t.ToString("X2"));
+            }
+
+            message.Body = sb.ToString();
+
+            // Send the message.
+            IMessage response = ServerEnvironment.SendRequest(message);
+
+            // Get the timestamp from the response.
+            response.Headers.TryGetValue("Timestamp", out string timestamp);
+
+            string responseBody = "";
+
+            bytes = new byte[response.Body.Length / 2];
+            for (var i = 0; i < bytes.Length; i++)
+            {
+                bytes[i] = Convert.ToByte(response.Body.Substring(i * 2, 2), 16);
+            }
+
+            responseBody = Encoding.Unicode.GetString(bytes);
+
+            // Output the response to the Console
+            Console.WriteLine($"At {timestamp} Response was: {responseBody}");
         }
 
 
