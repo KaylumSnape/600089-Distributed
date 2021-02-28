@@ -2,12 +2,12 @@
 
 namespace PipesAndFilters
 {
-    public class HelloWorldEndpoint : IEndpoint
+    public class UpdateUserEndpoint : IEndpoint
     {
         public IMessage Execute(IMessage message)
         {
             Message response = new Message();
-            response.Body = $"Hello {ServerEnvironment.CurrentUser.Name}! You sent the message: {message.Body}";
+            response.Body = $"Updated {ServerEnvironment.CurrentUser.Name} with the message: {message.Body}";
             response.Headers.Add("ResponseFormat", message.Headers["RequestFormat"]);
             return response;
         }

@@ -12,18 +12,23 @@ namespace PipesAndFilters
         public static User CurrentUser { get; private set; }
         private static IPipe IncomingPipe { get; set; }
         private static IPipe OutgoingPipe { get; set; }
+        private static Dictionary<string, IEndpoint> Endpoints { get; set; }
 
         public static void Setup()
         {
             Users = new List<User> {new User() {ID = 1, Name = "Test User"}};
             IncomingPipe = new Pipe();
             OutgoingPipe = new Pipe();
+            Endpoints = new Dictionary<string, IEndpoint>();
             
             IncomingPipe.RegisterFilter(new AuthenticateFilter());
             IncomingPipe.RegisterFilter(new TranslateFilter());
 
             OutgoingPipe.RegisterFilter(new TranslateFilter());
             OutgoingPipe.RegisterFilter(new TimestampFilter());
+
+            Endpoints.Add("HelloWorld", new HelloWorldEndpoint());
+            Endpoints.Add("UpdateUser", new UpdateUserEndpoint());
 
         }
 
@@ -47,8 +52,20 @@ namespace PipesAndFilters
             message = IncomingPipe.ProcessMessage(message);
 
             // 2. Send the message to the endpoint
-            HelloWorldEndpoint endpoint = new HelloWorldEndpoint();
-            message = endpoint.Execute(message);
+            message.Headers.TryGetValue("Endpoint", out var endpoint);
+
+            switch (endpoint)
+            {
+                case "HelloWorld":
+                    HelloWorldEndpoint helloEndpoint = new HelloWorldEndpoint();
+                    message = helloEndpoint.Execute(message);
+                    break;
+                case "UpdateUser":
+                    UpdateUserEndpoint updateEndpoint = new UpdateUserEndpoint();
+                    message = updateEndpoint.Execute(message);
+                    break;
+            }
+            
 
             // 3. Send the message through the outgoing pipeline
             message = OutgoingPipe.ProcessMessage(message);

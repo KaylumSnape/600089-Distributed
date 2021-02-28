@@ -27,18 +27,42 @@ namespace PipesAndFilters
                 encoding = Console.ReadLine();
             }
 
-            client.RequestHello(requestMessage, int.Parse(encoding ?? string.Empty));
+            // Different Endpoints.
+            Console.WriteLine("Please select an endpoint: \n1 - Execute \n2 - Update");
+            string endpoint = Console.ReadLine();
+
+            const string validEndpoint = "12";
+            while (!validEndpoint.Contains(endpoint) || String.IsNullOrEmpty(endpoint))
+            {
+                Console.WriteLine("Invalid.");
+                Console.WriteLine("Please select an endpoint: \n1 - Execute \n2 - Update");
+                endpoint = Console.ReadLine();
+            }
+
+            // Make request.
+            client.RequestHello(requestMessage, int.Parse(encoding), int.Parse(endpoint));
         }
     }
+
     class Client
     {
         int userId = 1;
-        public void RequestHello(string requestMessage, int encoding)
+        public void RequestHello(string requestMessage, int encoding, int endpoint)
         {
             IMessage message = new Message();
 
             // Add the user ID header
             message.Headers.Add("User", userId.ToString());
+
+            switch (endpoint)
+            {
+                case 1:
+                    message.Headers.Add("Endpoint", "HelloWorld");
+                    break;
+                case 2:
+                    message.Headers.Add("Endpoint", "UpdateUser");
+                    break;
+            }
             
             switch (encoding)
             {
