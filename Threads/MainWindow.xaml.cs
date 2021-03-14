@@ -22,6 +22,7 @@ namespace Threads
     public partial class MainWindow : Window
     {
         public List<int> primeNumbers;
+        public int[] parameters = new int[1];
 
         public MainWindow()
         {
@@ -56,15 +57,17 @@ namespace Threads
 
             // Because we have a callback method with IAsyncResult parameter,
             // We can forgo the explicit thread and invoke it through a Task.
-            Task t = Task.Run(() => ts.Invoke(20000));
+            parameters[0] = 0;
+            parameters[1] = 2000;
+            Task t = Task.Run(() => ts.Invoke(parameters));
             t.ContinueWith(FindPrimesFinished); // Run this callback method when the core task finishes.
         }
 
         // Changed method param to object.
-        private void FindPrimeNumbers(object param)
+        private void FindPrimeNumbers(int[] param)
         {
-            int numberOfPrimesToFind = (int) param;
-            int primeCount = 0;
+            var primeCount = param[0];
+            var numberOfPrimesToFind = param[1];
             int currentPossiblePrime = 1;
             while (primeCount < numberOfPrimesToFind)
             {
