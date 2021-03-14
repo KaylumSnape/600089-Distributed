@@ -12,12 +12,21 @@ namespace Client
         {
 
             // Add code here to send requests
+            const string message = "Hello!!!!!";
+
+            Task one = SendRequest(message, "TaskOne");
+            Task two = SendRequest(message, "TaskTwo");
+            Task three = SendRequest(message, "TaskThree");
+
+            one.Wait();
+            two.Wait();
+            three.Wait();
 
             Console.WriteLine("Execution finished");
             Console.ReadLine();
         }
 
-        public static void SendRequest(string message, string endpoint)
+        public static async Task SendRequest(string message, string endpoint)
         {
             // The use of the using blocks in this method ensure that the resources are disposed when no longer required
             using (TcpClient tcpClient = new TcpClient())
@@ -27,23 +36,23 @@ namespace Client
                 using (NetworkStream nStream = tcpClient.GetStream())
                 {
                     byte[] request = SerializeRequest(message, endpoint);
-                    nStream.Write(request, 0, request.Length);
+                    await nStream.WriteAsync(request, 0, request.Length);
 
-                    RetrieveResponse(nStream);
+                    await RetrieveResponse(nStream);
                 }
             }
         }
 
-        public static void RetrieveResponse(NetworkStream nStream)
+        public static async Task RetrieveResponse(NetworkStream nStream)
         {
             // The first part of the response is an integer which identifies how many bytes are in the proceeding message
             byte[] responseLengthBytes = new byte[4];
-            nStream.Read(responseLengthBytes, 0, 4);
+            await nStream.ReadAsync(responseLengthBytes, 0, 4);
             int responseLength = BitConverter.ToInt32(responseLengthBytes);
 
             // The second part of the response is the returned message. We know the length of this message as above
             byte[] responseBytes = new byte[responseLength];
-            nStream.Read(responseBytes, 0, responseLength);
+            await nStream.ReadAsync(responseBytes, 0, responseLength);
             string response = Encoding.ASCII.GetString(responseBytes);
 
             Console.WriteLine(response);
