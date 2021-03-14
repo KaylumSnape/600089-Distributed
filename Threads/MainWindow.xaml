@@ -6,8 +6,10 @@
         xmlns:local="clr-namespace:Threads"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Button x:Name="btn_click" Content="Find prime number." HorizontalAlignment="Center" Margin="0,137,0,0" VerticalAlignment="Top" Click="btn_click_1"/>
-        <TextBox x:Name="tb_output" HorizontalAlignment="Center" Margin="0,195,0,0" Text="TextBox" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
-    </Grid>
+	<Grid>
+		<Button x:Name="btn_click" Content="Find prime number." HorizontalAlignment="Center" Margin="0,147,0,0" VerticalAlignment="Top" Click="btn_click_1"/>
+		<TextBox x:Name="tb_output" HorizontalAlignment="Center" Margin="0,183,0,0" Text="TextBox" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+		<TextBox x:Name="tb_taskticks" HorizontalAlignment="Left" Margin="72,147,0,0" Text="Task ticks: " TextWrapping="Wrap" VerticalAlignment="Top" Width="173" Height="20"/>
+		<TextBox x:Name="tb_threadticks" HorizontalAlignment="Left" Margin="72,179,0,0" Text="Thread ticks: " TextWrapping="Wrap" VerticalAlignment="Top" Width="173" Height="22"/>
+	</Grid>
 </Window>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,7 +23,8 @@ namespace Threads
     public partial class MainWindow : Window
     {
         public List<int> primeNumbers;
-        public int[] parameters = new int[1];
+        public double threadSum = 0;
+        //public int[] Parameters = new int[2];
 
         public MainWindow()
         {
@@ -45,10 +47,10 @@ namespace Threads
             A Callback function is a method which the thread calls when it finishes.
             */
 
-            // Creating a thread with parameters.
+            // Creating a thread with params.
             // The thread encapsulates the method.
             // Can you do method calls within that method and it stays in that thread?
-            ParameterizedThreadStart ts = new ParameterizedThreadStart(FindPrimeNumbers); 
+            //var ts = new ParameterizedThreadStart(FindPrimeNumbers); 
 
             /* Threads without callback.
             Thread t = new Thread(ts);
@@ -57,18 +59,38 @@ namespace Threads
 
             // Because we have a callback method with IAsyncResult parameter,
             // We can forgo the explicit thread and invoke it through a Task.
-            parameters[0] = 0;
-            parameters[1] = 2000;
-            Task t = Task.Run(() => ts.Invoke(parameters));
-            t.ContinueWith(FindPrimesFinished); // Run this callback method when the core task finishes.
+            //Parameters[0] = 0;
+            //Parameters[1] = 2000;
+            //var t = Task.Run(() => ts.Invoke(Parameters));
+            //t.ContinueWith(FindPrimesFinished); // Run this callback method when the core task finishes.
+            
+            
+
+            for (var i = 0; i < 100; i++)
+            {
+                var pts = new ParameterizedThreadStart(FindPrimeNumbers);
+                var sw = new Stopwatch();
+                sw.Start();
+                pts += (param) =>
+                {
+                    sw = (Stopwatch) param;
+                    threadSum += sw.Elapsed.Ticks;
+                };
+                var thread = new Thread(pts);
+                thread.Start(sw);
+            }
+            
         }
 
         // Changed method param to object.
-        private void FindPrimeNumbers(int[] param)
+        private void FindPrimeNumbers(object param)
         {
-            var primeCount = param[0];
-            var numberOfPrimesToFind = param[1];
-            int currentPossiblePrime = 1;
+
+            var sw = (Stopwatch) param;
+            sw.Stop();
+            var primeCount = 0;
+            var numberOfPrimesToFind = 2000;
+            var currentPossiblePrime = 1;
             while (primeCount < numberOfPrimesToFind)
             {
                 currentPossiblePrime++;
@@ -98,6 +120,7 @@ namespace Threads
                 }
             }
         }
+
         // Callback method that runs when "FindPrimeNumbers" finishes.
         private void FindPrimesFinished(IAsyncResult iar) 
         { 
@@ -116,6 +139,7 @@ namespace Threads
         void UpdateTextBox(int number)
         {
             tb_output.Text = number.ToString();
+            tb_threadticks.Text = "Thread ticks: " + threadSum / 100;
         }
     }
 }
