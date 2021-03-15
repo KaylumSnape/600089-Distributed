@@ -23,7 +23,7 @@ namespace Threads
     public partial class MainWindow : Window
     {
         public List<int> primeNumbers;
-        public double threadSum = 0;
+        public double threadSum, taskSum = 0;
         //public int[] Parameters = new int[2];
 
         public MainWindow()
@@ -61,36 +61,55 @@ namespace Threads
             // We can forgo the explicit thread and invoke it through a Task.
             //Parameters[0] = 0;
             //Parameters[1] = 2000;
-            //var t = Task.Run(() => ts.Invoke(Parameters));
+            //var t = Task.Run(() => ts.Invoke(Parameters)); // Invoke the function that the thread delegates, with its parameters.
+            // .ContinueWith operates on the returned task. When task completes, continue with is ran.
+            // The task object will keep us updated with the status of the task, started, running, completed.
             //t.ContinueWith(FindPrimesFinished); // Run this callback method when the core task finishes.
-            
-            
 
+
+
+            //for (var i = 0; i < 100; i++)
+            //{
+            //    // Delegate, here is the function we would like to run. Not the only way to do this.
+            //    var pts = new ParameterizedThreadStart(FindPrimeNumbers);
+            //    var sw = new Stopwatch();
+            //    var toFind = 2000;
+            //    var other = 0;
+            //    sw.Start();
+            //    pts += (param) => // Adding new anonymous function.
+            //    {
+            //        // Callback.
+            //        sw = (Stopwatch)param;
+            //        threadSum += sw.Elapsed.Ticks;
+            //    };
+            //    var thread = new Thread(pts);
+            //    thread.Start(sw);
+            //}
+
+            // Make 100 tasks
             for (var i = 0; i < 100; i++)
             {
-                var pts = new ParameterizedThreadStart(FindPrimeNumbers);
+                // Delegate, here is the function we would like to run. Not the only way to do this.
+                var ts = new ParameterizedThreadStart(FindPrimeNumbers); // This is better than in the video.
                 var sw = new Stopwatch();
                 sw.Start();
-                pts += (param) =>
-                {
-                    sw = (Stopwatch) param;
-                    threadSum += sw.Elapsed.Ticks;
-                };
-                var thread = new Thread(pts);
-                thread.Start(sw);
+                Task.Run(() => ts.Invoke(new object[] { sw, 2000, 0 })) // WOOOOO, this is how you pass in params.
+                    .ContinueWith(result =>
+                    {
+                        // Callback
+                        taskSum += sw.Elapsed.Ticks;
+                    });
             }
-            
         }
 
         // Changed method param to object.
         private void FindPrimeNumbers(object param)
         {
 
-            var sw = (Stopwatch) param;
-            sw.Stop();
+            var sw = (Stopwatch) ((object[])param)[0]; // Extract stopwatch from param array.
             var primeCount = 0;
-            var numberOfPrimesToFind = 2000;
-            var currentPossiblePrime = 1;
+            var numberOfPrimesToFind = (int)((object[])param)[1];
+            var currentPossiblePrime = (int)((object[])param)[2];
             while (primeCount < numberOfPrimesToFind)
             {
                 currentPossiblePrime++;
@@ -111,7 +130,7 @@ namespace Threads
                 {
                     primeCount++;
                     primeNumbers.Add(currentPossiblePrime);
-
+                    sw.Stop();
                     // We can callback from the thread at any time we'd like, such as when we find a prime.
                     // I can use the UI as it keeps updating with these values.
                     this.Dispatcher.Invoke(
@@ -139,7 +158,8 @@ namespace Threads
         void UpdateTextBox(int number)
         {
             tb_output.Text = number.ToString();
-            tb_threadticks.Text = "Thread ticks: " + threadSum / 100;
+            tb_threadticks.Text = "Thread ticks: " + threadSum / 100; // Divide by 100 to get average number.
+            tb_taskticks.Text = "Task ticks: " + taskSum / 100;
         }
     }
 }

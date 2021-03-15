@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net.Sockets;
+using System.Reflection.Metadata;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Client
@@ -10,20 +12,61 @@ namespace Client
     {
         static void Main(string[] args)
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
 
             // Add code here to send requests
             const string message = "Hello!!!!!";
 
-            Task one = SendRequest(message, "TaskOne");
-            Task two = SendRequest(message, "TaskTwo");
-            Task three = SendRequest(message, "TaskThree");
+            // Creates a job, starts executing the job, then when it hits await returns and can move onto the next.
+            // This is more overhead than invoking the function on a new thread immediately.
+            var one = SendRequest(message, "TaskOne");
+            var two = SendRequest(message, "TaskTwo");
+            var three = SendRequest(message, "TaskThree");
 
-            one.Wait();
-            two.Wait();
-            three.Wait();
+            // Attempting faster different way.
+            var t1 = Task.Run(() => new ParameterizedThreadStart(SendRequest)
+                .Invoke(new object[] { "Wheeler Dealers.", "TaskUnknown" }));
 
-            Console.WriteLine("Execution finished");
+            // Call the synchronous Wait method on each of the tasks in turn.
+            // This will prevent the Client from continuing until the associated Task is complete.
+            //one.Wait();
+            //two.Wait();
+            //three.Wait();
+
+            //t1.Wait();
+
+            // Or use wait all.
+            Task.WaitAll(new Task[] {one, two, three, t1});
+
+            sw.Stop();
+
+            Console.WriteLine("Execution finished in " + sw.ElapsedMilliseconds + " milliseconds");
             Console.ReadLine();
+        }
+
+        // Duplicate created for attempt at faster calls.
+        public static void SendRequest(object param)
+        {
+            string message = (string)((object[])param)[0];
+            string endpoint = (string)((object[])param)[1];
+            // The use of the using blocks in this method ensure that the resources are disposed when no longer required
+            using (TcpClient tcpClient = new TcpClient())
+            {
+                tcpClient.Connect("127.0.0.1", 5000);
+
+                using (NetworkStream nStream = tcpClient.GetStream())
+                {
+                    byte[] request = SerializeRequest(message, endpoint);
+                    // When it hits an await, it returns the thread of execution back to the controller,
+                    // who made the call to this method, to allow it to continue.
+                    nStream.Write(request, 0, request.Length);
+
+                    // Because the method was changed to async, I have to make it a task and await response.
+                    var t = RetrieveResponse(nStream);
+                    t.Wait();
+                }
+            }
         }
 
         public static async Task SendRequest(string message, string endpoint)
@@ -36,7 +79,9 @@ namespace Client
                 using (NetworkStream nStream = tcpClient.GetStream())
                 {
                     byte[] request = SerializeRequest(message, endpoint);
-                    await nStream.WriteAsync(request, 0, request.Length);
+                    // When it hits an await, it returns the thread of execution back to the controller,
+                    // who made the call to this method, to allow it to continue.
+                    await nStream.WriteAsync(request, 0, request.Length); //At this point, control is passed back to the caller.
 
                     await RetrieveResponse(nStream);
                 }

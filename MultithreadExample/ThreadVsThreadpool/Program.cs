@@ -14,6 +14,7 @@ namespace ThreadVsThreadpool
             // Make 100 tasks
             for (int i = 0; i < 100; i++)
             {
+                // Delegate, here is the function we would like to run. Not the only way to do this.
                 ParameterizedThreadStart ts = new ParameterizedThreadStart(ThreadFunction); // This is better than in the video.
                 Stopwatch sw = new Stopwatch();
                 sw.Start();

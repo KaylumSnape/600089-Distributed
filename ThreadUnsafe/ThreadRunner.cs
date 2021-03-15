@@ -32,7 +32,7 @@ namespace ThreadUnsafe
             // Start all the threads.
             for (var i = 0; i < NumberToGenerate; i++)
             {
-                threads[i].Start(i + 1);
+                threads[i].Start(i + 1); // Pass in the param to the method/function (AddValue).
             }
 
             // Verify that the threads have finished running.

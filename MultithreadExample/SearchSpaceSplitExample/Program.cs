@@ -4,6 +4,10 @@ using System.Threading.Tasks;
 
 namespace SearchSpaceSplitExample
 {
+    // 10 threads, each increment by 10 to split it up.
+    // 1 - 11 - 21 etc..
+    // 2 - 12 - 22 ...
+    // 3 - 13 - 33 ...
     class Program
     {
         static Dictionary<int, double> squareRoots = new Dictionary<int, double>();
@@ -17,7 +21,7 @@ namespace SearchSpaceSplitExample
                 squareRoots.Add(i, 0);
             }
 
-            int step = 10;
+            int step = 10; // Add on 10 and work out what the square root of that is.
             Task[] tasks = new Task[step];
             for (int i = 0; i < step; i++)
             {
@@ -25,6 +29,7 @@ namespace SearchSpaceSplitExample
                 // As Task.Run requires a thread to be allocated from the pool, etc. i may be updated by the loop by the time the invoke is called
                 // Remove taskStartValue and pass i to CalculateSqrt to see what I mean...
                 int taskStartValue = i;
+                // New threads start working on this work, while we are still going round building the rest, caution.
                 tasks[i] = Task.Run(() => CalculateSqrt(taskStartValue, step, numberToCalculate));
             }
 
