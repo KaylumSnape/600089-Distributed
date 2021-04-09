@@ -16,7 +16,7 @@ namespace Client
             var message = Console.ReadLine();
             var request = Serialise(message);
             networkStream.Write(request, 0, request.Length); // Write data to the network connection.
-            // TODO: Read response from stream and display to user
+            // Read response from stream and display to user
             var response = ReadFromStream(networkStream); // Read the message off the stream.
             Console.WriteLine($"Received: {response}");
             Console.ReadKey(); // Wait for keypress before exit
