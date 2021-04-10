@@ -33,7 +33,11 @@ namespace DistSysAcw.Migrations
     // We don't want to lose our existing data.
     // New version of EF is smart enough, so this isn't an issue anymore.
     // It's still good to check the migration file before 'pushing' your changes to the DB.
-    public partial class InitialLayout : Migration
+
+    // Update-Database <Migration_Name> to rollback.
+    // If you want to start clean, manually delete migrations and tables in sql explorer.
+    // https://stackoverflow.com/questions/16035333/how-to-delete-and-recreate-from-scratch-an-existing-ef-code-first-database
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -41,15 +45,16 @@ namespace DistSysAcw.Migrations
                 name: "LogArchives",
                 columns: table => new
                 {
-                    LogId = table.Column<int>(type: "int", nullable: false)
+                    LogArchiveId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    LogId = table.Column<int>(type: "int", nullable: false),
                     ApiKey = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LogString = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
                     LogDateTime = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LogArchives", x => x.LogId);
+                    table.PrimaryKey("PK_LogArchives", x => x.LogArchiveId);
                 });
 
             migrationBuilder.CreateTable(
@@ -83,7 +88,7 @@ namespace DistSysAcw.Migrations
                         column: x => x.UserApiKey,
                         principalTable: "Users",
                         principalColumn: "ApiKey",
-                        onDelete: ReferentialAction.Restrict); // Might need to change this later.
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using DistSysAcw.Controllers;
+using Microsoft.Extensions.Primitives;
 
 namespace DistSysAcw.Models
 {
@@ -62,7 +64,10 @@ namespace DistSysAcw.Models
     public class LogArchive
     {
         [Key] 
-        public int LogId { get; set; } 
+        public int LogArchiveId { get; set; } // Auto incremented by DB.
+
+        [Required]
+        public int LogId { get; set; } // Link the log entry to its original log.
 
         [Required]
         public string ApiKey { get; set; } // Link the log entry to a user.
@@ -74,6 +79,7 @@ namespace DistSysAcw.Models
         [Required]
         public DateTime LogDateTime { get; set; }
 
+        // Might need an empty constructor for EF.
         // The only way to create a LogArchive is with an existing log and apiKey.
         public LogArchive(int logId, string apiKey, string logString, DateTime logDateTime)
         {
@@ -102,48 +108,69 @@ namespace DistSysAcw.Models
 
             var newUser = new User
             {
-                ApiKey =  new Guid().ToString(),
+                ApiKey =  Guid.NewGuid().ToString(),
                 UserName = userName,
                 Role = role,
-                Logs = new Collection<Log>()
+                Logs = new List<Log>()
             };
             
-            newUser.Logs.Add(LogAction(dbContext, $"PostUser: New {role} added to the system."));
             dbContext.Users.Add(newUser);
-            dbContext.SaveChanges();
 
+            // dbContext is saved when logging so no need to do it again.
+            LogAction(dbContext, newUser,
+                $"PostUser: New {role} {userName} added to the system.");
+            
             return newUser;
         }
 
         // Check if a user with a given ApiKey string exists in the database, returning true or false.
         public static bool UserApiKeyExists(UserContext dbContext, string apiKey)
         {
-            return dbContext.Users.FirstOrDefault(x => x.ApiKey == apiKey) != null;
+            return dbContext.Users.FirstOrDefault(u => u.ApiKey == apiKey) != null;
         }
 
         // Check if a user with a given user name exists in the database, returning true or false.
         public static bool UserNameExists(UserContext dbContext, string userName)
         {
-            return dbContext.Users.FirstOrDefault(x => x.UserName == userName) != null;
+            return dbContext.Users.FirstOrDefault(u => u.UserName == userName) != null;
         }
 
         // Check if a user with a given ApiKey and UserName exists in the database, returning true or false.
         public static bool UserExists(UserContext dbContext, string apiKey, string userName)
         {
-            return dbContext.Users.FirstOrDefault(x => x.ApiKey == apiKey && x.UserName == userName) != null;
+            return dbContext.Users.FirstOrDefault(u => u.ApiKey == apiKey && u.UserName == userName) != null;
         }
 
-        // Return a user with a given ApiKey
-        public static User GetUser(UserContext dbContext, string apiKey)
+        // Return a user and their logs with a given ApiKey.
+        // Returns null if no user found, so always null check when calling.
+        public static User GetUser(UserContext dbContext, string? apiKey, string? username)
         {
-            var user = dbContext.Users.FirstOrDefault(x => x.ApiKey == apiKey);
-            return user; // Returns null if no user found, so always null check when calling.
+            User user = null;
+
+            // When you query the DB, it will only return the table you ask for,
+            // it won't return the linked tables unless you tell it too with .Include.
+            if (apiKey != null)
+            {
+                user = dbContext.Users
+                    .Include(u => u.Logs)
+                    .FirstOrDefault(u => u.ApiKey == apiKey);
+            }
+
+            if (username != null)
+            {
+                user = dbContext.Users
+                    .Include(u => u.Logs)
+                    .FirstOrDefault(u => u.UserName == username);
+
+            }
+
+            return user; 
         }
         #endregion
 
         #region Task13
         // Create log of user activity.
-        public static Log LogAction(UserContext dbContext, string logString)
+        public static void LogAction(UserContext dbContext, User user, string logString)
         {
             var log = new Log
             {
@@ -151,42 +178,97 @@ namespace DistSysAcw.Models
                 LogDateTime = DateTime.Now
             };
 
-            //dbContext.Logs.Add(log);
-            // Maybe don't need this here, worried about saving while in the middle of other actions.
-            //dbContext.SaveChanges();
-
-            return log;
+            user.Logs.Add(log);
+            dbContext.SaveChanges();
         }
-
-        // Retrieve logs.
-        //public static Collection<Log> GetLogs(UserContext dbContext, string apiKey)
-        //{
-        //    var logs = new Collection<Log>();
-        //    var user = GetUser(dbContext, apiKey);
-
-        //    foreach (var logId in user.Logs)
-        //    {
-        //        logs.Add(dbContext.Logs.FirstOrDefault(x => x.LogId == logId));
-        //    }
-
-        //    return logs;
-        //}
 
         // When deleting a user, archive their logs in the LogArchive table.
         public static bool ArchiveUserLogs(UserContext dbContext, string apiKey)
         {
+            var user = GetUser(dbContext, apiKey, null);
 
-            var user = dbContext.Users
-                .Include(l => l.Logs)
-                .FirstOrDefault(u => u.ApiKey == apiKey);
+            // There should always be at least one log, PostUser.
+            if (user?.Logs == null) return false; // Null check. 
 
-            if (user == null) return false;
-
+            // Copy logs over from Log table to LogArchive, adding apiKey to identify the user.
             foreach (var log in user.Logs)
             {
                 dbContext.LogArchives.Add(new LogArchive(log.LogId, apiKey, log.LogString, log.LogDateTime));
             }
+
             dbContext.SaveChanges();
+            return true;
+        }
+        #endregion
+
+        #region Task 7
+        // Remove a user.
+        public static bool DeleteUser(UserContext dbContext, string apiKey, string username)
+        {
+            var user = GetUser(dbContext, apiKey, null);
+
+            // If user does not exit.
+            if (user == null)
+            {
+                return false;
+            }
+
+            LogAction(dbContext, user,
+                $"DeleteUser: /user/removeuser called for {user.UserName}");
+
+            // If the retrieved user's username does not match the supplied username.
+            if (user.UserName != username)
+            {
+                return false;
+            }
+
+            // Have to log here as the next function archives the logs for the user.
+            LogAction(dbContext, user,
+                $"DeleteUser: Attempting ArchiveUserLogs before removing user: {user.UserName}");
+
+            // Archive user logs, if unsuccessful return false.
+            if (!ArchiveUserLogs(dbContext, user.ApiKey))
+            {
+                LogAction(dbContext, user,
+                    $"DeleteUser: Failed to archive logs and remove user: {user.UserName}");
+
+                return false;
+            }
+            
+            // Remove user.
+            dbContext.Users.Remove(user);
+
+            dbContext.SaveChanges();
+            return true;
+        }
+        #endregion
+
+        #region TASK8
+        // Change a users role.
+        public static bool ChangeUserRole(UserContext dbContext, JsonChangeRole jsonChangeRole, string apiKey)
+        {
+            var userPerformingAction = GetUser(dbContext, apiKey, null);
+
+            if (userPerformingAction != null)
+            {
+                LogAction(dbContext, userPerformingAction,
+                    $"ChangeUserRole: /user/changerole called for {jsonChangeRole.username} to {jsonChangeRole.role}.");
+            }
+
+            var user = GetUser(dbContext, null, jsonChangeRole.username);
+
+            if (user == null)
+            {
+                return false;
+            }
+            
+            // We know it's a valid enum because we check in the api route.
+            // https://www.dotnetperls.com/enum-parse
+            user.Role = Enum.Parse<User.Roles>(jsonChangeRole.role);
+
+            LogAction(dbContext, user,
+                $"ChangeUserRole: {jsonChangeRole.username} role has been changed to {jsonChangeRole.role} by {userPerformingAction.UserName}.");
+
             return true;
         }
         #endregion

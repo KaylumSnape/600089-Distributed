@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using DistSysAcw.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -12,13 +14,14 @@ using Microsoft.Extensions.Options;
 namespace DistSysAcw.Auth
 {
     /// <summary>
-    /// Authenticates clients by API Key
+    /// Authenticates clients by API Key.
+    /// Inherits from AuthenticationHandler class with custom auth options, defined bellow.
     /// </summary>
     public class CustomAuthenticationHandler
         : AuthenticationHandler<AuthenticationSchemeOptions>, IAuthenticationHandler
     {
         private Models.UserContext DbContext { get; set; }
-
+        
         public CustomAuthenticationHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
@@ -30,17 +33,51 @@ namespace DistSysAcw.Auth
             DbContext = dbContext;
         }
 
+        // Method that will either pass the authentication or cause it to fail.
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             #region Task5
-            // TODO:  Find if a header ‘ApiKey’ exists, and if it does, check the database to determine if the given API Key is valid
-            //        Then create the correct Claims, add these to a ClaimsIdentity, create a ClaimsPrincipal from the identity 
-            //        Then use the Principal to generate a new AuthenticationTicket to return a Success AuthenticateResult
-            #endregion
+            // If an ApiKey header does not exist.
+            if (!Request.Headers.ContainsKey("ApiKey"))
+            {
+                return Task.FromResult(AuthenticateResult.NoResult());
+            }
+            else
+            {
+                var apiKey = Context.Request.Headers["ApiKey"];
 
-            return Task.FromResult(AuthenticateResult.Fail("Not Authenticated"));
+                // If the ApiKey is not valid, the user does not exists in the DB.
+                if (!UserDatabaseAccess.UserApiKeyExists(DbContext, apiKey))
+                    return Task.FromResult(AuthenticateResult.Fail("Unauthorized. Check ApiKey in Header is correct."));
+
+                // If the ApiKey is valid.
+                var user = UserDatabaseAccess.GetUser(DbContext, apiKey, null);
+
+                // Create Claims.
+                var claims = new[]
+                {
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.Role, user.Role.ToString())
+                };
+
+                // Add claims to ClaimsIdentity.
+                var identity = new ClaimsIdentity(claims, "ApiKey");
+
+                // ClaimsPrincipal create from the identity.
+                var claimsPrincipal = new ClaimsPrincipal(identity);
+
+                // Generate a new AuthenticationTicket from claimsPrincipal.
+                var ticket = new AuthenticationTicket(claimsPrincipal, this.Scheme.Name);
+
+                // Return a Success AuthenticateResult.
+                return Task.FromResult(AuthenticateResult.Success(ticket));
+            }
+            #endregion
         }
 
+        // Deal with 401 challenge concerns.
+        // We don't challenge the user, just deny access.
+        // https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationhandler-1.handlechallengeasync?view=aspnetcore-5.0.
         protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
         {
             byte[] messagebytes = Encoding.ASCII.GetBytes("Task 5 Incomplete");

@@ -46,7 +46,7 @@ namespace DistSysAcw.Migrations
 
             modelBuilder.Entity("DistSysAcw.Models.LogArchive", b =>
                 {
-                    b.Property<int>("LogId")
+                    b.Property<int>("LogArchiveId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .UseIdentityColumn();
@@ -58,12 +58,15 @@ namespace DistSysAcw.Migrations
                     b.Property<DateTime>("LogDateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("LogId")
+                        .HasColumnType("int");
+
                     b.Property<string>("LogString")
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
-                    b.HasKey("LogId");
+                    b.HasKey("LogArchiveId");
 
                     b.ToTable("LogArchives");
                 });
