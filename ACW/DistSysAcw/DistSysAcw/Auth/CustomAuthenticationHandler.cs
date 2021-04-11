@@ -42,45 +42,44 @@ namespace DistSysAcw.Auth
             {
                 return Task.FromResult(AuthenticateResult.NoResult());
             }
-            else
+
+            var apiKey = Context.Request.Headers["ApiKey"];
+
+            // If the ApiKey is not valid, the user does not exists in the DB.
+            var user = UserDatabaseAccess.GetUser(DbContext, apiKey, null);
+            if (user is null)
             {
-                var apiKey = Context.Request.Headers["ApiKey"];
-
-                // If the ApiKey is not valid, the user does not exists in the DB.
-                if (!UserDatabaseAccess.UserApiKeyExists(DbContext, apiKey))
-                    return Task.FromResult(AuthenticateResult.Fail("Unauthorized. Check ApiKey in Header is correct."));
-
-                // If the ApiKey is valid.
-                var user = UserDatabaseAccess.GetUser(DbContext, apiKey, null);
-
-                // Create Claims.
-                var claims = new[]
-                {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(ClaimTypes.Role, user.Role.ToString())
-                };
-
-                // Add claims to ClaimsIdentity.
-                var identity = new ClaimsIdentity(claims, "ApiKey");
-
-                // ClaimsPrincipal create from the identity.
-                var claimsPrincipal = new ClaimsPrincipal(identity);
-
-                // Generate a new AuthenticationTicket from claimsPrincipal.
-                var ticket = new AuthenticationTicket(claimsPrincipal, this.Scheme.Name);
-
-                // Return a Success AuthenticateResult.
-                return Task.FromResult(AuthenticateResult.Success(ticket));
+                // Fail authentication, causing HandleChallengeAsync to be called.
+                return Task.FromResult(AuthenticateResult.Fail("ApiKey not valid."));
             }
+
+            // Create Claims.
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Role, user.Role.ToString())
+            };
+
+            // Add claims to ClaimsIdentity.
+            var identity = new ClaimsIdentity(claims, "ApiKey");
+
+            // ClaimsPrincipal created from the identity.
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+
+            // Generate a new AuthenticationTicket from claimsPrincipal.
+            var ticket = new AuthenticationTicket(claimsPrincipal, this.Scheme.Name);
+
+            // Return a Success AuthenticateResult.
+            return Task.FromResult(AuthenticateResult.Success(ticket));
             #endregion
         }
 
-        // Deal with 401 challenge concerns.
+        // Deal with 401 challenge concerns, when user fails authentication.
         // We don't challenge the user, just deny access.
         // https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.authentication.authenticationhandler-1.handlechallengeasync?view=aspnetcore-5.0.
         protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
         {
-            byte[] messagebytes = Encoding.ASCII.GetBytes("Task 5 Incomplete");
+            var messagebytes = Encoding.ASCII.GetBytes("Unauthorized. Check ApiKey in Header is correct.");
             Context.Response.StatusCode = 401;
             Context.Response.ContentType = "application/json";
             await Context.Response.Body.WriteAsync(messagebytes, 0, messagebytes.Length);

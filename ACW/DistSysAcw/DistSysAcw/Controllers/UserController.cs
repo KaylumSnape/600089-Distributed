@@ -63,10 +63,11 @@ namespace DistSysAcw.Controllers
         // Authenticate who we are talking to in CustomAuthenticationHandler.
         // Verify the authentic user is authorised to carry out this action in CustomAuthorizationHandler.
         [Authorize(Roles = "Admin, User")] 
-        public ActionResult Delete([FromQuery] string username)
+        public ActionResult Delete([FromHeader] string apiKey, [FromQuery] string username)
         {
-            // apiKey is valid otherwise it would have failed Authentication and Authorisation.
-            var apiKey = Request.Headers["ApiKey"];  
+            var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
+            UserDatabaseAccess.LogAction(_dbContext, user,
+                $"/user/removeuser called for {user.UserName}.");
 
             return Ok(UserDatabaseAccess.DeleteUser(_dbContext, apiKey, username));
         }
@@ -77,12 +78,14 @@ namespace DistSysAcw.Controllers
         [HttpPut] // Idempotent action
         [ActionName("ChangeRole")]
         [Authorize(Roles = "Admin")]
-        public ActionResult ChangeRole([FromBody] JsonChangeRole jsonRequest)
+        public ActionResult ChangeRole([FromHeader] string apiKey, [FromBody] JsonChangeRole jsonRequest)
         {
             // User is already authenticated and authorised if they reach this point,
             // Still need their apiKey to add a log.
 
-            var apiKey = Request.Headers["ApiKey"];
+            var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
+            UserDatabaseAccess.LogAction(_dbContext, user,
+                $"/user/changerole called for {jsonRequest.username} by {user.UserName}");
 
             JsonChangeRole jsonChangeRole;
 
@@ -108,7 +111,7 @@ namespace DistSysAcw.Controllers
             }
 
             // If success.
-            if (UserDatabaseAccess.ChangeUserRole(_dbContext, jsonChangeRole, apiKey))
+            if (UserDatabaseAccess.ChangeUserRole(_dbContext, jsonChangeRole))
             {
                 return Ok("DONE");
             }

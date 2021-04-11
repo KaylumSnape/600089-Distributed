@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using DistSysAcwClient.Class;
 using Newtonsoft.Json;
 
 namespace DistSysAcwClient
@@ -17,40 +18,66 @@ namespace DistSysAcwClient
         static void Main(string[] args)
         {
             Console.WriteLine("Hello. What would you like to do?");
-            string inputString = Console.ReadLine().ToLower();
-            switch (inputString)
+
+            var userInput = Console.ReadLine();
+            
+            while (userInput != "exit")
             {
-                case string a when a.Contains("hello"):
+                try
                 {
-                    TalkBackHello().Wait();
-                } break;
-                default: { } break;
-            }
-            Console.ReadKey();
-        }
-        
-        static async Task TalkBackHello()
-        {
-            client.BaseAddress = new Uri("http://localhost:44394/");
-            try
-            {
-                var result = await client.GetAsync("api/talkback/hello");
-                Console.WriteLine(result.ToString());
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.GetBaseException().Message);
-            }
-        }
+                    switch (userInput)
+                    {
+                        case {} a when a.ToLower().Contains("talkback") && a.ToLower().Contains("hello"):
+                        {
+                            Tasks.TalkBackHello().Wait();
+                        } break;
 
-        static async Task<string> GetStringAsync(string path)
-        {
-            string responsestring = "";
-            HttpResponseMessage response = await client.GetAsync(path);
-            responsestring = await response.Content.ReadAsStringAsync();
-            return responsestring;
-        }
+                        case {} a when a.ToLower().Contains("talkback") && a.ToLower().Contains("sort"):
+                        {
+                            var split = userInput.Split('[');
+                            var tokens = split[1];
+                            Tasks.TalkBackSort(tokens.Replace(",", "&integers=")
+                                .Replace("]", "")).Wait();
+                        } break;
 
+                        case {} a when a.ToLower().Contains("user") && a.ToLower().Contains("get"):
+                        {
+                            var split = userInput.Split(' ');
+                            Tasks.UserGet(split[2]).Wait();
+                        } break;
+
+                        case {} a when a.ToLower().Contains("user") && a.ToLower().Contains("post"):
+                        {
+                            var split = userInput.Split(' ');
+                            Tasks.UserPost(split[2]).Wait();
+                        } break;
+
+                        case {} a when a.ToLower().Contains("user") && a.ToLower().Contains("set"):
+                        {
+                            var split = userInput.Split(' ');
+                            Tasks.UserSet(split[2], split[3]);
+                        } break;
+
+                        case {} a when a.ToLower().Contains("user") && a.ToLower().Contains("delete"):
+                        {
+                            var split = userInput.Split(' ');
+                            Tasks.UserDelete(split[1]).Wait();
+                        } break;
+
+                        default: { } break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.GetBaseException().Message);
+                }
+
+                Console.WriteLine("What would you like to do next?");
+                userInput = Console.ReadLine();
+                Console.Clear();
+            }
+            Environment.Exit(1);
+        }
     }
     #endregion
 }

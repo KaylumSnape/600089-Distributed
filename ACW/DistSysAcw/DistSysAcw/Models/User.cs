@@ -207,25 +207,12 @@ namespace DistSysAcw.Models
         {
             var user = GetUser(dbContext, apiKey, null);
 
-            // If user does not exit.
-            if (user == null)
+            // If user does not exist or username does not match the supplied username.
+            if (user == null || user?.UserName != username)
             {
                 return false;
             }
-
-            LogAction(dbContext, user,
-                $"DeleteUser: /user/removeuser called for {user.UserName}");
-
-            // If the retrieved user's username does not match the supplied username.
-            if (user.UserName != username)
-            {
-                return false;
-            }
-
-            // Have to log here as the next function archives the logs for the user.
-            LogAction(dbContext, user,
-                $"DeleteUser: Attempting ArchiveUserLogs before removing user: {user.UserName}");
-
+            
             // Archive user logs, if unsuccessful return false.
             if (!ArchiveUserLogs(dbContext, user.ApiKey))
             {
@@ -245,16 +232,8 @@ namespace DistSysAcw.Models
 
         #region TASK8
         // Change a users role.
-        public static bool ChangeUserRole(UserContext dbContext, JsonChangeRole jsonChangeRole, string apiKey)
+        public static bool ChangeUserRole(UserContext dbContext, JsonChangeRole jsonChangeRole)
         {
-            var userPerformingAction = GetUser(dbContext, apiKey, null);
-
-            if (userPerformingAction != null)
-            {
-                LogAction(dbContext, userPerformingAction,
-                    $"ChangeUserRole: /user/changerole called for {jsonChangeRole.username} to {jsonChangeRole.role}.");
-            }
-
             var user = GetUser(dbContext, null, jsonChangeRole.username);
 
             if (user == null)
@@ -267,12 +246,10 @@ namespace DistSysAcw.Models
             user.Role = Enum.Parse<User.Roles>(jsonChangeRole.role);
 
             LogAction(dbContext, user,
-                $"ChangeUserRole: {jsonChangeRole.username} role has been changed to {jsonChangeRole.role} by {userPerformingAction.UserName}.");
+                $"ChangeUserRole: {jsonChangeRole.username} role has been changed to {jsonChangeRole.role}.");
 
             return true;
         }
         #endregion
     }
-
-
 }

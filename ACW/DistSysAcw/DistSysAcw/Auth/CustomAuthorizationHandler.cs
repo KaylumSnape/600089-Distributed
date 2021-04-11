@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Http;
@@ -12,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace DistSysAcw.Auth
 {
     /// <summary>
-    /// Authorises clients by role
+    /// Authorises clients by role.
     /// </summary>
     public class CustomAuthorizationHandler : AuthorizationHandler<RolesAuthorizationRequirement>, IAuthorizationHandler
     {
@@ -26,10 +27,6 @@ namespace DistSysAcw.Auth
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, RolesAuthorizationRequirement requirement)
         {
             #region Task6
-            // TODO:  Modify the server's behaviour so that, when the action requires a user to be in Admin role ONLY 
-            // (e.g. [Authorize(Roles = "Admin")]) and the user does not have the Admin role, you return a Forbidden status (403) 
-            // with the message: "Forbidden. Admin access only."
-            
             // If the user is not null and it's identity has been authenticated (from CustomAuthenticationHandler).
             if (context.User != null && context.User.Identity.IsAuthenticated)
             {
@@ -40,13 +37,17 @@ namespace DistSysAcw.Auth
                     context.Succeed(requirement);
                     return Task.CompletedTask;
                 }
+
+                // If the user is not in the required role, they are not authorised.
+                context.Fail();
+                HttpContextAccessor.HttpContext.Response.StatusCode = 403;
+                HttpContextAccessor.HttpContext.Response.WriteAsync(JsonSerializer.Serialize("Forbidden. Admin access only."));
             }
-            
-            // If the user is not in the required role, they are not authorised.
-            context.Fail();
-            HttpContextAccessor.HttpContext.Response.StatusCode = 403;
-            HttpContextAccessor.HttpContext.Response.WriteAsync(JsonSerializer.Serialize("Forbidden. Admin access only."));
-            
+            // TODO: Mention in report that I was setting 403 response outside of authentication check,
+            // so I just moved it inside so it only sets the 403 response when the user is not in the
+            // correct role (fails authorisation), leaving the response free to be set to 401 when
+            // failing authentication.
+
             return Task.CompletedTask;
             #endregion
         }
