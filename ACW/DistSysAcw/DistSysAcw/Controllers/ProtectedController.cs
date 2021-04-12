@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using DistSysAcw.Cryptography;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using DistSysAcw.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -21,10 +22,8 @@ namespace DistSysAcw.Controllers
         [HttpGet]
         [ActionName("Hello")]
         [Authorize(Roles = "Admin, User")]
-        public ActionResult Get()
+        public ActionResult Get([FromHeader] string apiKey)
         {
-            var apiKey = Request.Headers["ApiKey"];
-
             var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
 
             UserDatabaseAccess.LogAction(_dbContext, user,
@@ -37,14 +36,12 @@ namespace DistSysAcw.Controllers
         [HttpGet]
         [ActionName("SHA1")]
         [Authorize(Roles = "Admin, User")]
-        public ActionResult GetSha1([FromQuery] string message)
+        public ActionResult GetSha1([FromHeader] string apiKey, [FromQuery] string message)
         {
             if (string.IsNullOrWhiteSpace(message))
             {
                 return BadRequest("Bad Request");
             }
-
-            var apiKey = Request.Headers["ApiKey"];
 
             var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
 
@@ -58,14 +55,12 @@ namespace DistSysAcw.Controllers
         [HttpGet]
         [ActionName("SHA256")]
         [Authorize(Roles = "Admin, User")]
-        public ActionResult GetSha256([FromQuery] string message)
+        public ActionResult GetSha256([FromHeader] string apiKey, [FromQuery] string message)
         {
             if (string.IsNullOrWhiteSpace(message))
             {
                 return BadRequest("Bad Request");
             }
-
-            var apiKey = Request.Headers["ApiKey"];
 
             var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
 
@@ -73,6 +68,24 @@ namespace DistSysAcw.Controllers
                 $"{user.UserName} requested /protected/sha256.");
 
             return Ok(Sha256Encrypt(message));
+        }
+        #endregion
+
+        #region TASK11
+        // api/protected/getpublickey
+        [HttpGet]
+        [ActionName("GetPublicKey")]
+        [Authorize(Roles = "Admin, User")]
+        public ActionResult GetPublicKey([FromHeader] string apiKey)
+        {
+            var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
+
+            UserDatabaseAccess.LogAction(_dbContext, user,
+                $"{user.UserName} requested /protected/getpublickey.");
+
+            var rsaCryptography = new RsaCryptography();
+            
+            return Ok(rsaCryptography.GetPublicKey());
         }
         #endregion
     }

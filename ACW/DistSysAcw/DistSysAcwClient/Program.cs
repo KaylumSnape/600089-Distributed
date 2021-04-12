@@ -1,70 +1,127 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Security.Cryptography;
-using System.Threading.Tasks;
-using DistSysAcwClient.Class;
-using Newtonsoft.Json;
+﻿using DistSysAcwClient.Class;
+using System;
 
 namespace DistSysAcwClient
 {
     #region Task 10 and beyond
-    class Client
+    internal class Client
     {
-        static HttpClient client = new HttpClient();
-        static void Main(string[] args)
+        private static void Main()
         {
             Console.WriteLine("Hello. What would you like to do?");
 
             var userInput = Console.ReadLine();
-            
-            while (userInput != "exit")
+
+            while (userInput?.ToLower() != "exit")
             {
                 try
                 {
-                    switch (userInput)
+                    var splitInput = userInput?.Split(' ');
+
+                    switch (splitInput) // Originally userInput
                     {
-                        case {} a when a.ToLower().Contains("talkback") && a.ToLower().Contains("hello"):
-                        {
-                            Tasks.TalkBackHello().Wait();
-                        } break;
+                        case { } a when a[0].ToLower() == "talkback" && a[1].ToLower() == "hello":
+                            {
+                                Console.WriteLine("...please wait...");
+                                Tasks.TalkBackHello().Wait();
+                            }
+                            break;
 
-                        case {} a when a.ToLower().Contains("talkback") && a.ToLower().Contains("sort"):
-                        {
-                            var split = userInput.Split('[');
-                            var tokens = split[1];
-                            Tasks.TalkBackSort(tokens.Replace(",", "&integers=")
-                                .Replace("]", "")).Wait();
-                        } break;
+                        case { } a when a[0].ToLower() == "talkback" && a[1].ToLower() == "sort":
+                            {
+                                var integers = splitInput[2].Replace("[", "&integers=")
+                                    .Replace("]", "")
+                                    .Replace(",", "&integers=");
 
-                        case {} a when a.ToLower().Contains("user") && a.ToLower().Contains("get"):
-                        {
-                            var split = userInput.Split(' ');
-                            Tasks.UserGet(split[2]).Wait();
-                        } break;
+                                Console.WriteLine("...please wait...");
+                                Tasks.TalkBackSort(integers).Wait();
+                            }
+                            break;
 
-                        case {} a when a.ToLower().Contains("user") && a.ToLower().Contains("post"):
-                        {
-                            var split = userInput.Split(' ');
-                            Tasks.UserPost(split[2]).Wait();
-                        } break;
+                        case { } a when a[0].ToLower() == "user" && a[1].ToLower() == "get":
+                            {
+                                Console.WriteLine("...please wait...");
+                                if (splitInput.Length != 3) // Added this functionality so client response is same as server.
+                                {
+                                    throw new Exception("False - User Does Not Exist! Did you mean to do a POST to create a new user?");
+                                }
+                                Tasks.UserGet(splitInput[2]).Wait();
+                            }
+                            break;
 
-                        case {} a when a.ToLower().Contains("user") && a.ToLower().Contains("set"):
-                        {
-                            var split = userInput.Split(' ');
-                            Tasks.UserSet(split[2], split[3]);
-                        } break;
+                        case { } a when a[0].ToLower() == "user" && a[1].ToLower() == "post":
+                            {
+                                Console.WriteLine("...please wait...");
+                                if (splitInput.Length != 3)
+                                {
+                                    throw new Exception("Oops. Make sure your body contains a string with your username and your Content-Type is Content-Type:application/json");
+                                }
+                                Tasks.UserPost(splitInput[2]).Wait();
+                            }
+                            break;
 
-                        case {} a when a.ToLower().Contains("user") && a.ToLower().Contains("delete"):
-                        {
-                            var split = userInput.Split(' ');
-                            Tasks.UserDelete(split[1]).Wait();
-                        } break;
+                        case { } a when a[0].ToLower() == "user" && a[1].ToLower() == "set":
+                            {
+                                Console.WriteLine("...please wait...");
+                                Tasks.UserSet(splitInput[2], splitInput[3]);
+                            }
+                            break;
 
-                        default: { } break;
+                        case { } a when a[0].ToLower() == "user" && a[1].ToLower() == "delete":
+                            {
+                                Console.WriteLine("...please wait...");
+                                Tasks.UserDelete().Wait();
+                            }
+                            break;
+
+                        case { } a when a[0].ToLower() == "user" && a[1].ToLower() == "role":
+                            {
+                                Console.WriteLine("...please wait...");
+                                Tasks.ChangeUserRole(splitInput[2], splitInput[3]).Wait();
+                            }
+                            break;
+
+                        case { } a when a[0].ToLower() == "protected"  && a[1].ToLower() == "hello":
+                            {
+                                Console.WriteLine("...please wait...");
+                                Tasks.ProtectedHello().Wait();
+                            }
+                            break;
+
+                        case { } a when a[0].ToLower() == "protected" && a[1].ToLower() == "sha1":
+                            {
+                                Console.WriteLine("...please wait...");
+                                if (splitInput.Length != 3)
+                                {
+                                    throw new Exception("Bad Request");
+                                }
+                                Tasks.ProtectedSha1(splitInput[2]).Wait();
+                            }
+                            break;
+
+                        case { } a when a[0].ToLower() == "protected" && a[1].ToLower() == "sha256":
+                            {
+                                Console.WriteLine("...please wait...");
+                                if (splitInput.Length != 3)
+                                {
+                                    throw new Exception("Bad Request");
+                                }
+                                Tasks.ProtectedSha256(splitInput[2]).Wait();
+                            }
+                            break;
+
+                        case { } a when a[0].ToLower() == "protected" && a[1].ToLower() == "get" && a[2].ToLower() == "publickey":
+                        {
+                            Console.WriteLine("...please wait...");
+                            Tasks.GetPublicKey().Wait();
+                        }
+                            break;
+
+                        default:
+                            {
+                                Console.WriteLine("Command not recognised.");
+                            }
+                            break;
                     }
                 }
                 catch (Exception e)

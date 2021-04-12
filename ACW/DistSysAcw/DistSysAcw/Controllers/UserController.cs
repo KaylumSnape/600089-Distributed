@@ -1,15 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using DistSysAcw.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
-using DistSysAcw.Models;
-using Microsoft.AspNetCore.Authorization;
-using Newtonsoft.Json;
-using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 namespace DistSysAcw.Controllers
 {
@@ -47,7 +39,7 @@ namespace DistSysAcw.Controllers
             // If the username is already taken.
             if (UserDatabaseAccess.UserNameExists(_dbContext, jsonUsername))
             {
-                return StatusCode(403,"Oops. This username is already in use. Please try again with a new username.");
+                return StatusCode(403, "Oops. This username is already in use. Please try again with a new username.");
             }
 
             // Create a new user and return the ApiKey as a string to the client.
@@ -62,7 +54,7 @@ namespace DistSysAcw.Controllers
         [ActionName("RemoveUser")]
         // Authenticate who we are talking to in CustomAuthenticationHandler.
         // Verify the authentic user is authorised to carry out this action in CustomAuthorizationHandler.
-        [Authorize(Roles = "Admin, User")] 
+        [Authorize(Roles = "Admin, User")]
         public ActionResult Delete([FromHeader] string apiKey, [FromQuery] string username)
         {
             var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
@@ -75,10 +67,9 @@ namespace DistSysAcw.Controllers
 
         #region TASK8
         // api/user/changerole
-        [HttpPut] // Idempotent action
         [ActionName("ChangeRole")]
         [Authorize(Roles = "Admin")]
-        public ActionResult ChangeRole([FromHeader] string apiKey, [FromBody] JsonChangeRole jsonRequest)
+        public ActionResult ChangeRole([FromHeader] string apiKey, [FromBody] ChangeRole jsonRequest)
         {
             // User is already authenticated and authorised if they reach this point,
             // Still need their apiKey to add a log.
@@ -87,7 +78,7 @@ namespace DistSysAcw.Controllers
             UserDatabaseAccess.LogAction(_dbContext, user,
                 $"/user/changerole called for {jsonRequest.username} by {user.UserName}");
 
-            JsonChangeRole jsonChangeRole;
+            ChangeRole jsonChangeRole;
 
             try
             {
@@ -97,7 +88,7 @@ namespace DistSysAcw.Controllers
             {
                 return BadRequest("NOT DONE: An error occurred");
             }
-            
+
             // If username does not exist.
             if (!UserDatabaseAccess.UserNameExists(_dbContext, jsonChangeRole.username))
             {
@@ -119,13 +110,5 @@ namespace DistSysAcw.Controllers
             return BadRequest("NOT DONE: An error occurred");
         }
         #endregion
-    }
-
-    // Model for change role json request.
-    // https://andrewlock.net/model-binding-json-posts-in-asp-net-core/
-    public class JsonChangeRole
-    {
-        public string username { get; set; }
-        public string role { get; set; }
     }
 }

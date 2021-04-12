@@ -232,7 +232,7 @@ namespace DistSysAcw.Models
 
         #region TASK8
         // Change a users role.
-        public static bool ChangeUserRole(UserContext dbContext, JsonChangeRole jsonChangeRole)
+        public static bool ChangeUserRole(UserContext dbContext, ChangeRole jsonChangeRole)
         {
             var user = GetUser(dbContext, null, jsonChangeRole.username);
 
@@ -251,5 +251,15 @@ namespace DistSysAcw.Models
             return true;
         }
         #endregion
+    }
+
+    // Model for change role json request.
+    // https://andrewlock.net/model-binding-json-posts-in-asp-net-core/
+    // The JSON object to change a users role.
+    public class ChangeRole
+    {
+        public string username { get; set; }
+        public string role { get; set; }
+
     }
 }

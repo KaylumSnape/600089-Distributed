@@ -41,12 +41,15 @@ namespace DistSysAcw.Auth
                 // If the user is not in the required role, they are not authorised.
                 context.Fail();
                 HttpContextAccessor.HttpContext.Response.StatusCode = 403;
-                HttpContextAccessor.HttpContext.Response.WriteAsync(JsonSerializer.Serialize("Forbidden. Admin access only."));
+                HttpContextAccessor.HttpContext.Response.WriteAsync("Forbidden. Admin access only.");
             }
             // TODO: Mention in report that I was setting 403 response outside of authentication check,
             // so I just moved it inside so it only sets the 403 response when the user is not in the
             // correct role (fails authorisation), leaving the response free to be set to 401 when
             // failing authentication.
+
+            // Also mention that I was returning a JsonSerializer.Serialize("Forbidden. Admin access only.")
+            // Meaning that the response included the "", I just returned the text instead.
 
             return Task.CompletedTask;
             #endregion
