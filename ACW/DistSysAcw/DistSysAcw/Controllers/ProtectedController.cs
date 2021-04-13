@@ -25,7 +25,6 @@ namespace DistSysAcw.Controllers
         public ActionResult Get([FromHeader] string apiKey)
         {
             var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
-
             UserDatabaseAccess.LogAction(_dbContext, user,
                 $"{user.UserName} requested /protected/hello.");
 
@@ -38,16 +37,14 @@ namespace DistSysAcw.Controllers
         [Authorize(Roles = "Admin, User")]
         public ActionResult GetSha1([FromHeader] string apiKey, [FromQuery] string message)
         {
+            var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
+            UserDatabaseAccess.LogAction(_dbContext, user,
+                $"{user.UserName} requested /protected/sha1.");
+
             if (string.IsNullOrWhiteSpace(message))
             {
                 return BadRequest("Bad Request");
             }
-
-            var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
-
-            UserDatabaseAccess.LogAction(_dbContext, user,
-                $"{user.UserName} requested /protected/sha1.");
-            
             return Ok(Sha1Encrypt(message));
         }
 
@@ -57,16 +54,14 @@ namespace DistSysAcw.Controllers
         [Authorize(Roles = "Admin, User")]
         public ActionResult GetSha256([FromHeader] string apiKey, [FromQuery] string message)
         {
+            var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
+            UserDatabaseAccess.LogAction(_dbContext, user,
+                $"{user.UserName} requested /protected/sha256.");
+
             if (string.IsNullOrWhiteSpace(message))
             {
                 return BadRequest("Bad Request");
             }
-
-            var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
-
-            UserDatabaseAccess.LogAction(_dbContext, user,
-                $"{user.UserName} requested /protected/sha256.");
-
             return Ok(Sha256Encrypt(message));
         }
         #endregion
@@ -79,13 +74,38 @@ namespace DistSysAcw.Controllers
         public ActionResult GetPublicKey([FromHeader] string apiKey)
         {
             var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
-
             UserDatabaseAccess.LogAction(_dbContext, user,
                 $"{user.UserName} requested /protected/getpublickey.");
-
-            var rsaCryptography = new RsaCryptography();
             
-            return Ok(rsaCryptography.GetPublicKey());
+            var rsa = RsaCryptography.GetRsaInstance();
+            var publicKey = rsa.GetPublicKey();
+            if (publicKey is null)
+            {
+                return BadRequest("Couldn’t Get the Public Key");
+            }
+            return Ok(publicKey);
+        }
+        #endregion
+
+        #region TASK12
+        // api/protected/sign
+        [HttpGet]
+        [ActionName("Sign")]
+        [Authorize(Roles = "Admin, User")]
+        public ActionResult Sign([FromHeader] string apiKey, [FromQuery] string message)
+        {
+            var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
+            UserDatabaseAccess.LogAction(_dbContext, user,
+                $"{user.UserName} requested /protected/sign.");
+
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return BadRequest("Bad Request");
+            }
+
+            var rsa = RsaCryptography.GetRsaInstance();
+            var signed = rsa.Sign(message);
+            return Ok(signed);
         }
         #endregion
     }

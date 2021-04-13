@@ -81,7 +81,7 @@ namespace DistSysAcwClient
                             }
                             break;
 
-                        case { } a when a[0].ToLower() == "protected"  && a[1].ToLower() == "hello":
+                        case { } a when a[0].ToLower() == "protected" && a[1].ToLower() == "hello":
                             {
                                 Console.WriteLine("...please wait...");
                                 Tasks.ProtectedHello().Wait();
@@ -111,10 +111,21 @@ namespace DistSysAcwClient
                             break;
 
                         case { } a when a[0].ToLower() == "protected" && a[1].ToLower() == "get" && a[2].ToLower() == "publickey":
-                        {
-                            Console.WriteLine("...please wait...");
-                            Tasks.GetPublicKey().Wait();
-                        }
+                            {
+                                Console.WriteLine("...please wait...");
+                                Tasks.GetPublicKey().Wait();
+                            }
+                            break;
+
+                        case { } a when a[0].ToLower() == "protected" && a[1].ToLower() == "sign":
+                            {
+                                Console.WriteLine("...please wait...");
+                                if (splitInput.Length != 3)
+                                {
+                                    throw new Exception("Bad Request");
+                                }
+                                Tasks.ProtectedSign(splitInput[2]).Wait();
+                            }
                             break;
 
                         default:

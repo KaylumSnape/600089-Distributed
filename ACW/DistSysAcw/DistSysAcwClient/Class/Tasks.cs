@@ -234,5 +234,37 @@ namespace DistSysAcwClient.Class
                 return response;
             }
         }
+
+        internal static async Task<string> ProtectedSign(string message)
+        {
+            var response = "You need to do a User Post or User Set first";
+            if (string.IsNullOrWhiteSpace(ApiKey))
+            {
+                Console.WriteLine(response);
+                return response;
+            }
+            
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri($"{BaseDomain}api/protected/sign?message={message}"),
+                Method = HttpMethod.Get
+            };
+            httpRequest.Headers.Add("ApiKey", ApiKey);
+            var httpResponse = await Client.SendAsync(httpRequest);
+            PublicKey = await httpResponse.Content.ReadAsStringAsync();
+            if (httpResponse.IsSuccessStatusCode)
+            {
+
+                response = "Got Public Key";
+                Console.WriteLine(response);
+                return response;
+            }
+            else
+            {
+                response = "Couldn’t Get the Public Key";
+                Console.WriteLine(response);
+                return response;
+            }
+        }
     }
 }
