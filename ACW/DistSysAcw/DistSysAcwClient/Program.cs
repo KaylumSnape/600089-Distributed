@@ -128,6 +128,23 @@ namespace DistSysAcwClient
                             }
                             break;
 
+                        case { } a when a[0].ToLower() == "protected" && a[1].ToLower() == "addfifty":
+                        {
+                            Console.WriteLine("...please wait...");
+                            if (splitInput.Length != 3)
+                            {
+                                throw new Exception("Please enter a message to be signed.");
+                            }
+                            
+                            if (!int.TryParse(splitInput[2], out var o))
+                            {
+                                throw new Exception("A valid integer must be given!");
+                            }
+
+                            Tasks.ProtectedAddFifty(splitInput[2]).Wait();
+                        }
+                            break;
+
                         default:
                             {
                                 Console.WriteLine("Command not recognised.");

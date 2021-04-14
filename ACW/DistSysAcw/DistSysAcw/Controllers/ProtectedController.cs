@@ -115,5 +115,34 @@ namespace DistSysAcw.Controllers
             return Ok(signed);
         }
         #endregion
+
+        #region TASK14
+        // api/protected/addfifty
+        [HttpGet]
+        [ActionName("AddFifty")]
+        [Authorize(Roles = "Admin")]
+        public ActionResult AddFifty([FromHeader] string apiKey, [FromQuery] string encryptedInteger, [FromQuery] string encryptedSymKey, [FromQuery] string encryptedIV)
+        {
+            var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
+            UserDatabaseAccess.LogAction(_dbContext, user,
+                $"{user.UserName} requested /protected/addfifty.");
+
+            if (string.IsNullOrWhiteSpace(encryptedInteger) ||
+                string.IsNullOrWhiteSpace(encryptedSymKey) ||
+                string.IsNullOrWhiteSpace(encryptedIV))
+            {
+                return BadRequest();
+            }
+
+            var rsa = RsaCryptography.GetRsaInstance();
+            var addFifty = rsa.AddFifty(encryptedInteger, encryptedSymKey, encryptedIV);
+            if (addFifty is null)
+            {
+                return BadRequest();
+            }
+
+            return Ok(addFifty);
+        }
+        #endregion
     }
 }

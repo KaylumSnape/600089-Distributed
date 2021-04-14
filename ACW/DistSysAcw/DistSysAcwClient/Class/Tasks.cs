@@ -14,7 +14,8 @@ namespace DistSysAcwClient.Class
         //private const string BaseDomain = "http://150.237.94.9/2839013/"; // http://distsysacwserver.net.dcs.hull.ac.uk/2839013/Api/Other/Clear
 
         public static string UserName = string.Empty;
-        public static string ApiKey = "8cd9a4d8-a93c-4096-92e6-15c5b7ce25eb"; // "e8c0c77e-ee70-4e41-a840-367aae696ec6"
+        public static string ApiKey = "8cd9a4d8-a93c-4096-92e6-15c5b7ce25eb"; // 
+        //public static string ApiKey = "e8c0c77e-ee70-4e41-a840-367aae696ec6"; // Test Server.
         public static string PublicKey = string.Empty;
 
         internal static async Task<string> TalkBackHello()
@@ -262,7 +263,7 @@ namespace DistSysAcwClient.Class
                 var signedHexMessage = await httpResponse.Content.ReadAsStringAsync();
 
                 var originalMessageBytes = Encoding.ASCII.GetBytes(message);
-                var signedBytes = Converters.HexStringToBytes(signedHexMessage, true);
+                var signedBytes = Converters.HexStringToBytes(signedHexMessage);
 
                 var verified = RsaCsp.Verify(PublicKey, originalMessageBytes, signedBytes);
 
@@ -275,6 +276,62 @@ namespace DistSysAcwClient.Class
             }
 
             response = "Message was not successfully signed";
+            Console.WriteLine(response);
+            return response;
+        }
+
+        internal static async Task<string> ProtectedAddFifty(string stringInt)
+        {
+            var response = "You need to do a User Post or User Set first";
+            if (string.IsNullOrWhiteSpace(ApiKey))
+            {
+                Console.WriteLine(response);
+                return response;
+            }
+            if (string.IsNullOrWhiteSpace(PublicKey))
+            {
+                response = "Client doesn’t yet have the public key";
+                Console.WriteLine(response);
+                return response;
+            }
+            
+            // Get newly generated Aes info (key and IV) and int as bytes, add to a list.
+            var bytesToEncrypt = AesProvider.GetAesInfo();
+            bytesToEncrypt.Add(Encoding.ASCII.GetBytes(stringInt));
+
+            // Encrypt the data in the list with RSA public key from server.
+            var encryptedList = RsaCsp.EncryptList(PublicKey, bytesToEncrypt);
+
+            // Get the string of the encrypted data and assign to respective values.
+            var encryptedHexSymKey = BitConverter.ToString(encryptedList[0]);
+            var encryptedHexIv = BitConverter.ToString(encryptedList[1]);
+            var encryptedHexInteger = BitConverter.ToString(encryptedList[2]);
+            
+            var httpRequest = new HttpRequestMessage
+            {
+                RequestUri = new Uri($"{BaseDomain}api/protected/addfifty?encryptedInteger={encryptedHexInteger}&encryptedSymKey={encryptedHexSymKey}&encryptedIV={encryptedHexIv}"),
+                Method = HttpMethod.Get
+            };
+            httpRequest.Headers.Add("ApiKey", ApiKey);
+
+            var httpResponse = await Client.SendAsync(httpRequest);
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                var aesEncryptedHexInteger = await httpResponse.Content.ReadAsStringAsync();
+                
+                var aesEncryptedInteger = Converters.HexStringToBytes(aesEncryptedHexInteger);
+
+                var decryptedInteger = AesProvider.Decrypt(bytesToEncrypt[0], bytesToEncrypt[1], aesEncryptedInteger);
+
+                if (decryptedInteger != null)
+                {
+                    response = decryptedInteger;
+                    Console.WriteLine(response);
+                    return response;
+                }
+            }
+
+            response = "An error occurred!";
             Console.WriteLine(response);
             return response;
         }

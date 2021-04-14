@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace DistSysAcwClient.Class
+namespace DistSysAcw.Cryptography
 {
-    internal class Converters
+    public class Converters
     {
         public static byte[] HexStringToBytes(string hexString)
         {

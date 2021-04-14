@@ -118,5 +118,31 @@ namespace DistSysAcw.Cryptography
                 return null;
             }
         }
+
+        public string AddFifty(string encryptedInteger, string encryptedSymkey, string encryptedIv)
+        {
+            var encryptedIntegerBytes = Converters.HexStringToBytes(encryptedInteger);
+            var encryptedSymkeyBytes = Converters.HexStringToBytes(encryptedSymkey);
+            var encryptedIvBytes = Converters.HexStringToBytes(encryptedIv);
+
+            var decryptedInteger = Decrypt(Encoding.ASCII.GetString(encryptedIntegerBytes));
+            var decryptedSymkey = Decrypt(Encoding.ASCII.GetString(encryptedSymkeyBytes));
+            var decryptedIv = Decrypt(Encoding.ASCII.GetString(encryptedIvBytes));
+
+            try
+            {
+                using var myAes = Aes.Create();
+                myAes.Key = Encoding.ASCII.GetBytes(decryptedSymkey);
+                myAes.IV = Encoding.ASCII.GetBytes(decryptedIv);
+                // Encrypt with aes - then hex encode and send back.
+
+                return null;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
+        }
     }
 }
