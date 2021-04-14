@@ -9,14 +9,12 @@ namespace DistSysAcwClient.Class
     internal class Tasks
     {
         private static readonly HttpClient Client = new HttpClient();
-        
-        private const string BaseDomain = "https://localhost:44394/";
-        //private const string BaseDomain = "http://distsysacwserver.net.dcs.hull.ac.uk/2839013/";
 
-        // http://distsysacwserver.net.dcs.hull.ac.uk/2839013/Api/Other/Clear
+        private const string BaseDomain = "https://localhost:44394/";
+        //private const string BaseDomain = "http://150.237.94.9/2839013/"; // http://distsysacwserver.net.dcs.hull.ac.uk/2839013/Api/Other/Clear
 
         public static string UserName = string.Empty;
-        public static string ApiKey = "8cd9a4d8-a93c-4096-92e6-15c5b7ce25eb"; // "8cd9a4d8-a93c-4096-92e6-15c5b7ce25eb"
+        public static string ApiKey = "8cd9a4d8-a93c-4096-92e6-15c5b7ce25eb"; // "e8c0c77e-ee70-4e41-a840-367aae696ec6"
         public static string PublicKey = string.Empty;
 
         internal static async Task<string> TalkBackHello()
@@ -151,7 +149,7 @@ namespace DistSysAcwClient.Class
                 Console.WriteLine("You need to do a User Post or User Set first");
                 return;
             }
-            
+
             var httpRequest = new HttpRequestMessage
             {
                 RequestUri = new Uri($"{BaseDomain}api/protected/hello"),
@@ -171,7 +169,7 @@ namespace DistSysAcwClient.Class
                 Console.WriteLine("You need to do a User Post or User Set first");
                 return;
             }
-            
+
             var httpRequest = new HttpRequestMessage
             {
                 RequestUri = new Uri($"{BaseDomain}api/protected/sha1?message={message}"),
@@ -191,7 +189,7 @@ namespace DistSysAcwClient.Class
                 Console.WriteLine("You need to do a User Post or User Set first");
                 return;
             }
-            
+
             var httpRequest = new HttpRequestMessage
             {
                 RequestUri = new Uri($"{BaseDomain}api/protected/sha256?message={message}"),
@@ -212,13 +210,14 @@ namespace DistSysAcwClient.Class
                 Console.WriteLine(response);
                 return response;
             }
-            
+
             var httpRequest = new HttpRequestMessage
             {
                 RequestUri = new Uri($"{BaseDomain}api/protected/getpublickey"),
                 Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("ApiKey", ApiKey);
+
             var httpResponse = await Client.SendAsync(httpRequest);
             PublicKey = await httpResponse.Content.ReadAsStringAsync();
             if (httpResponse.IsSuccessStatusCode)
@@ -243,28 +242,41 @@ namespace DistSysAcwClient.Class
                 Console.WriteLine(response);
                 return response;
             }
-            
+            if (string.IsNullOrWhiteSpace(PublicKey))
+            {
+                response = "Client doesn’t yet have the public key";
+                Console.WriteLine(response);
+                return response;
+            }
+
             var httpRequest = new HttpRequestMessage
             {
                 RequestUri = new Uri($"{BaseDomain}api/protected/sign?message={message}"),
                 Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("ApiKey", ApiKey);
+
             var httpResponse = await Client.SendAsync(httpRequest);
-            PublicKey = await httpResponse.Content.ReadAsStringAsync();
             if (httpResponse.IsSuccessStatusCode)
             {
+                var signedHexMessage = await httpResponse.Content.ReadAsStringAsync();
 
-                response = "Got Public Key";
-                Console.WriteLine(response);
-                return response;
+                var originalMessageBytes = Encoding.ASCII.GetBytes(message);
+                var signedBytes = Converters.HexStringToBytes(signedHexMessage, true);
+
+                var verified = RsaCsp.Verify(PublicKey, originalMessageBytes, signedBytes);
+
+                if (verified)
+                {
+                    response = "Message was successfully signed";
+                    Console.WriteLine(response);
+                    return response;
+                }
             }
-            else
-            {
-                response = "Couldn’t Get the Public Key";
-                Console.WriteLine(response);
-                return response;
-            }
+
+            response = "Message was not successfully signed";
+            Console.WriteLine(response);
+            return response;
         }
     }
 }

@@ -58,10 +58,18 @@ namespace DistSysAcw.Cryptography
 
         public string GetPublicKey()
         {
-            using var rsa = new RSACryptoServiceProvider(_cspParams);
-            rsa.ImportParameters(_rsaParams);
-            var publicKey = rsa.ToXmlString(false);
-            return publicKey;
+            try
+            {
+                using var rsa = new RSACryptoServiceProvider(_cspParams);
+                rsa.ImportParameters(_rsaParams);
+                return rsa.ToXmlString(false);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return null;
+            }
+
         }
 
         public string Encrypt(string plainText)
@@ -70,8 +78,7 @@ namespace DistSysAcw.Cryptography
             {
                 using var rsa = new RSACryptoServiceProvider(_cspParams);
                 rsa.ImportParameters(_rsaParams);
-                var encryptedBytes = rsa.Encrypt(Encoding.Unicode.GetBytes(plainText), false);
-                return Encoding.Unicode.GetString(encryptedBytes);
+                return Encoding.Unicode.GetString(rsa.Encrypt(Encoding.Unicode.GetBytes(plainText), false));
             }
             catch (Exception e)
             {
@@ -86,8 +93,7 @@ namespace DistSysAcw.Cryptography
             {
                 using var rsa = new RSACryptoServiceProvider(_cspParams);
                 rsa.ImportParameters(_rsaParams);
-                var decryptedBytes = rsa.Decrypt(Encoding.Unicode.GetBytes(cypherText), false);
-                return Encoding.Unicode.GetString(decryptedBytes);
+                return Encoding.Unicode.GetString(rsa.Decrypt(Encoding.Unicode.GetBytes(cypherText), false));
             }
             catch (Exception e)
             {
@@ -102,15 +108,9 @@ namespace DistSysAcw.Cryptography
             {
                 using var rsa = new RSACryptoServiceProvider(_cspParams);
                 rsa.ImportParameters(_rsaParams);
-                //var test1 = rsa.SignData(Encoding.Unicode.GetBytes(message), HashAlgorithmName.SHA1);
-                var test = rsa.SignHash(Encoding.Unicode.GetBytes(message), HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
-                //var a = Encoding.Unicode.GetString(test1);
-                var b = Encoding.Unicode.GetString(test);
-
-                //var c = Encoding.ASCII.GetString(test1);
-                var d = Encoding.ASCII.GetString(test);
-
-                return b;
+                // Computes the hash value of the specified byte array using the specified hash algorithm, and signs the resulting hash value.
+                // Then converts it to Hex.
+                return BitConverter.ToString(rsa.SignData(Encoding.ASCII.GetBytes(message), CryptoConfig.CreateFromName("SHA1")));
             }
             catch (Exception e)
             {

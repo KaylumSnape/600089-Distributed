@@ -1,4 +1,6 @@
-﻿using DistSysAcw.Cryptography;
+﻿using System.Security.Cryptography;
+using System.Text;
+using DistSysAcw.Cryptography;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using DistSysAcw.Models;
@@ -100,11 +102,16 @@ namespace DistSysAcw.Controllers
 
             if (string.IsNullOrWhiteSpace(message))
             {
-                return BadRequest("Bad Request");
+                return BadRequest();
             }
 
             var rsa = RsaCryptography.GetRsaInstance();
             var signed = rsa.Sign(message);
+            if (signed is null)
+            {
+                return BadRequest();
+            }
+
             return Ok(signed);
         }
         #endregion

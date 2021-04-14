@@ -122,7 +122,7 @@ namespace DistSysAcwClient
                                 Console.WriteLine("...please wait...");
                                 if (splitInput.Length != 3)
                                 {
-                                    throw new Exception("Bad Request");
+                                    throw new Exception("Please enter a message to be signed.");
                                 }
                                 Tasks.ProtectedSign(splitInput[2]).Wait();
                             }
