@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Security.Cryptography;
 
 namespace DistSysAcwClient.Class
@@ -23,21 +22,29 @@ namespace DistSysAcwClient.Class
 
         internal static string Decrypt(byte[] key, byte[] iV, byte[] cipherText)
         {
-            // Create an Aes object with the specified key and IV.
-            using var myAes = Aes.Create();
-            myAes.Key = key;
-            myAes.IV = iV;
+            try
+            {
+                // Create an Aes object with the specified key and IV.
+                using var myAes = Aes.Create();
+                myAes.Key = key;
+                myAes.IV = iV;
 
-            // Create a decryptor to perform the stream transform.
-            var decryptor = myAes.CreateDecryptor(myAes.Key, myAes.IV);
+                // Create a decryptor to perform the stream transform.
+                var decryptor = myAes.CreateDecryptor(myAes.Key, myAes.IV);
 
-            // Create the streams used for decryption.
-            using var msDecrypt = new MemoryStream(cipherText);
-            using var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
-            using var srDecrypt = new StreamReader(csDecrypt);
+                // Create the streams used for decryption.
+                using var msDecrypt = new MemoryStream(cipherText);
+                using var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
+                using var srDecrypt = new StreamReader(csDecrypt);
 
-            // Read the decrypted bytes from the decrypting stream and return them.
-            return srDecrypt.ReadToEnd();
+                // Read the decrypted bytes from the decrypting stream and return them.
+                return srDecrypt.ReadToEnd();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
         }
     }
 }

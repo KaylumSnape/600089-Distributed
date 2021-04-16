@@ -1,7 +1,7 @@
-﻿using DistSysAcw.Models;
+﻿using System;
+using DistSysAcw.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
 
 namespace DistSysAcw.Controllers
 {
@@ -10,19 +10,22 @@ namespace DistSysAcw.Controllers
         private readonly UserContext _dbContext; // Not to be changed by the controller.
 
         // Pass in UserContext through dependency injection.
-        public UserController(Models.UserContext dbcontext) : base(dbcontext)
+        public UserController(UserContext dbcontext) : base(dbcontext)
         {
             _dbContext = dbcontext;
         }
 
         #region TASK4
+
         // api/user/new?username=UserOne
         [HttpGet]
         [ActionName("New")]
         public ActionResult Get([FromQuery] string username)
         {
             // If the user exists, respond true, if not and also if string is empty, respond false.
-            return Ok(UserDatabaseAccess.UserNameExists(_dbContext, username) ? "True - User Does Exist! Did you mean to do a POST to create a new user?" : "False - User Does Not Exist! Did you mean to do a POST to create a new user?");
+            return Ok(UserDatabaseAccess.UserNameExists(_dbContext, username)
+                ? "True - User Does Exist! Did you mean to do a POST to create a new user?"
+                : "False - User Does Not Exist! Did you mean to do a POST to create a new user?");
         }
 
         // api/user/new
@@ -32,23 +35,22 @@ namespace DistSysAcw.Controllers
         {
             // If there is no string submitted in the body, from body fails. Otherwise, If the string is empty.
             if (string.IsNullOrWhiteSpace(jsonUsername))
-            {
-                return BadRequest("Oops. Make sure your body contains a string with your username and your Content-Type is Content-Type:application/json");
-            }
+                return BadRequest(
+                    "Oops. Make sure your body contains a string with your username and your Content-Type is Content-Type:application/json");
 
             // If the username is already taken.
             if (UserDatabaseAccess.UserNameExists(_dbContext, jsonUsername))
-            {
                 return StatusCode(403, "Oops. This username is already in use. Please try again with a new username.");
-            }
 
             // Create a new user and return the ApiKey as a string to the client.
             var newUser = UserDatabaseAccess.PostUser(_dbContext, jsonUsername);
             return Ok(newUser.ApiKey);
         }
+
         #endregion
 
         #region TASK7
+
         // api/user/removeuser?username=UserOne
         [HttpDelete]
         [ActionName("RemoveUser")]
@@ -63,9 +65,11 @@ namespace DistSysAcw.Controllers
 
             return Ok(UserDatabaseAccess.DeleteUser(_dbContext, apiKey, username));
         }
+
         #endregion
 
         #region TASK8
+
         // api/user/changerole
         [ActionName("ChangeRole")]
         [Authorize(Roles = "Admin")]
@@ -91,24 +95,18 @@ namespace DistSysAcw.Controllers
 
             // If username does not exist.
             if (!UserDatabaseAccess.UserNameExists(_dbContext, jsonChangeRole.username))
-            {
                 return BadRequest("NOT DONE: Username does not exist");
-            }
 
             // If role does not exist.
             if (!Enum.IsDefined(typeof(User.Roles), jsonChangeRole.role))
-            {
                 return BadRequest("NOT DONE: Role does not exist");
-            }
 
             // If success.
-            if (UserDatabaseAccess.ChangeUserRole(_dbContext, jsonChangeRole))
-            {
-                return Ok("DONE");
-            }
+            if (UserDatabaseAccess.ChangeUserRole(_dbContext, jsonChangeRole)) return Ok("DONE");
 
             return BadRequest("NOT DONE: An error occurred");
         }
+
         #endregion
     }
 }

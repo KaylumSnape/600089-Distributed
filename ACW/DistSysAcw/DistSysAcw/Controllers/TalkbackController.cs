@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using DistSysAcw.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DistSysAcw.Controllers
@@ -8,12 +7,15 @@ namespace DistSysAcw.Controllers
     public class TalkbackController : BaseController
     {
         /// <summary>
-        /// Constructs a TalkBack controller, taking the UserContext through dependency injection
+        ///     Constructs a TalkBack controller, taking the UserContext through dependency injection
         /// </summary>
         /// <param name="dbcontext">DbContext set as a service in Startup.cs and dependency injected</param>
-        public TalkbackController(Models.UserContext dbcontext) : base(dbcontext) { }
+        public TalkbackController(UserContext dbcontext) : base(dbcontext)
+        {
+        }
 
         #region TASK1
+
         // api/talkback/hello
         [ActionName("Hello")]
         [HttpGet]
@@ -21,13 +23,14 @@ namespace DistSysAcw.Controllers
         {
             return Ok("Hello World"); // Ok creates a new OkObjectResult(200).
         }
+
         #endregion
 
         #region TASK2
+
         // api/talkback/sort?integers=2&integers=5&integers=8
         [ActionName("Sort")]
         [HttpGet]
-        
         public ActionResult Get([FromQuery] string[] integers) // Accepting string[] so I can handle bad request.
         {
             if (integers == null) return Ok(new int[0]); // If no values are submitted.
@@ -42,7 +45,7 @@ namespace DistSysAcw.Controllers
                 return BadRequest();
             }
         }
+
         #endregion
     }
-    
 }

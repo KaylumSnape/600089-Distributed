@@ -1,21 +1,21 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace DistSysAcwClient.Class
 {
     internal class Tasks
     {
+        private const string BaseDomain = "https://localhost:44394/";
+        //private const string BaseDomain = "http://150.237.94.9/2839013/"; // http://150.237.94.9/2839013/Api/Other/Clear
         private static readonly HttpClient Client = new HttpClient();
 
-        private const string BaseDomain = "https://localhost:44394/";
-        //private const string BaseDomain = "http://150.237.94.9/2839013/"; // http://distsysacwserver.net.dcs.hull.ac.uk/2839013/Api/Other/Clear
-
         public static string UserName = string.Empty;
-        public static string ApiKey = "8cd9a4d8-a93c-4096-92e6-15c5b7ce25eb"; // 
-        //public static string ApiKey = "e8c0c77e-ee70-4e41-a840-367aae696ec6"; // Test Server.
+
+        //public static string ApiKey = "8cd9a4d8-a93c-4096-92e6-15c5b7ce25eb"; // Local.
+        public static string ApiKey = string.Empty;
         public static string PublicKey = string.Empty;
 
         internal static async Task<string> TalkBackHello()
@@ -27,7 +27,6 @@ namespace DistSysAcwClient.Class
             };
             var httpResponse = await Client.SendAsync(httpRequest);
             var responseString = await httpResponse.Content.ReadAsStringAsync();
-            Console.WriteLine(responseString);
             return responseString;
         }
 
@@ -39,8 +38,10 @@ namespace DistSysAcwClient.Class
                 Method = HttpMethod.Get
             };
             var httpResponse = await Client.SendAsync(httpRequest);
+
             var responseString = await httpResponse.Content.ReadAsStringAsync();
             Console.WriteLine(responseString);
+
             var integerArray = Array.ConvertAll(responseString
                 .Replace("[", "")
                 .Replace("]", "")
@@ -56,39 +57,32 @@ namespace DistSysAcwClient.Class
                 Method = HttpMethod.Get
             };
             var httpResponse = await Client.SendAsync(httpRequest);
+
             var responseString = await httpResponse.Content.ReadAsStringAsync();
-            Console.WriteLine(responseString);
             return responseString;
         }
 
-        internal static async Task<string> UserPost(string token)
+        internal static async Task<string> UserPost(string userName)
         {
             var httpRequest = new HttpRequestMessage
             {
                 RequestUri = new Uri($"{BaseDomain}api/user/new"),
                 Method = HttpMethod.Post,
-                Content = new StringContent(JsonConvert.SerializeObject(token), Encoding.UTF8, "application/json")
+                Content = new StringContent(JsonConvert.SerializeObject(userName), Encoding.UTF8, "application/json")
             };
             var httpResponse = await Client.SendAsync(httpRequest);
+
             var responseString = await httpResponse.Content.ReadAsStringAsync();
-            if (httpResponse.IsSuccessStatusCode)
-            {
-                UserName = token;
-                ApiKey = responseString;
-                Console.WriteLine("Got API Key");
-            }
-            else
-            {
-                Console.WriteLine(responseString);
-            }
-            return responseString;
+            if (!httpResponse.IsSuccessStatusCode) return responseString;
+            UserName = userName;
+            ApiKey = responseString;
+            return "Got API Key";
         }
 
         internal static void UserSet(string userName, string apiKey)
         {
             UserName = userName;
             ApiKey = apiKey;
-            Console.WriteLine("Stored");
         }
 
         internal static async Task<bool> UserDelete()
@@ -106,27 +100,13 @@ namespace DistSysAcwClient.Class
             };
             httpRequest.Headers.Add("ApiKey", ApiKey);
             var httpResponse = await Client.SendAsync(httpRequest);
-            var responseString = await httpResponse.Content.ReadAsStringAsync();
-            Console.WriteLine(responseString);
-            if (httpResponse.IsSuccessStatusCode)
-            {
-                Console.WriteLine(responseString);
-                return true;
-            }
-            else
-            {
-                Console.WriteLine(false);
-                return false;
-            }
+
+            return httpResponse.IsSuccessStatusCode;
         }
 
-        internal static async Task ChangeUserRole(string userName, string role)
+        internal static async Task<string> ChangeUserRole(string userName, string role)
         {
-            if (string.IsNullOrWhiteSpace(ApiKey))
-            {
-                Console.WriteLine("You need to do a User Post or User Set first");
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(ApiKey)) return "You need to do a User Post or User Set first";
 
             var changeRole = new ChangeRole(userName, role);
 
@@ -138,18 +118,13 @@ namespace DistSysAcwClient.Class
             };
             httpRequest.Headers.Add("ApiKey", ApiKey);
             var httpResponse = await Client.SendAsync(httpRequest);
-            var response = await httpResponse.Content.ReadAsStringAsync();
 
-            Console.WriteLine(response);
+            return await httpResponse.Content.ReadAsStringAsync();
         }
 
-        internal static async Task ProtectedHello()
+        internal static async Task<string> ProtectedHello()
         {
-            if (string.IsNullOrWhiteSpace(ApiKey))
-            {
-                Console.WriteLine("You need to do a User Post or User Set first");
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(ApiKey)) return "You need to do a User Post or User Set first";
 
             var httpRequest = new HttpRequestMessage
             {
@@ -158,18 +133,13 @@ namespace DistSysAcwClient.Class
             };
             httpRequest.Headers.Add("ApiKey", ApiKey);
             var httpResponse = await Client.SendAsync(httpRequest);
-            var response = await httpResponse.Content.ReadAsStringAsync();
 
-            Console.WriteLine(response);
+            return await httpResponse.Content.ReadAsStringAsync();
         }
 
-        internal static async Task ProtectedSha1(string message)
+        internal static async Task<string> ProtectedSha1(string message)
         {
-            if (string.IsNullOrWhiteSpace(ApiKey))
-            {
-                Console.WriteLine("You need to do a User Post or User Set first");
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(ApiKey)) return "You need to do a User Post or User Set first";
 
             var httpRequest = new HttpRequestMessage
             {
@@ -178,18 +148,13 @@ namespace DistSysAcwClient.Class
             };
             httpRequest.Headers.Add("ApiKey", ApiKey);
             var httpResponse = await Client.SendAsync(httpRequest);
-            var response = await httpResponse.Content.ReadAsStringAsync();
 
-            Console.WriteLine(response);
+            return await httpResponse.Content.ReadAsStringAsync();
         }
 
-        internal static async Task ProtectedSha256(string message)
+        internal static async Task<string> ProtectedSha256(string message)
         {
-            if (string.IsNullOrWhiteSpace(ApiKey))
-            {
-                Console.WriteLine("You need to do a User Post or User Set first");
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(ApiKey)) return "You need to do a User Post or User Set first";
 
             var httpRequest = new HttpRequestMessage
             {
@@ -198,19 +163,13 @@ namespace DistSysAcwClient.Class
             };
             httpRequest.Headers.Add("ApiKey", ApiKey);
             var httpResponse = await Client.SendAsync(httpRequest);
-            var response = await httpResponse.Content.ReadAsStringAsync();
 
-            Console.WriteLine(response);
+            return await httpResponse.Content.ReadAsStringAsync();
         }
 
         internal static async Task<string> GetPublicKey()
         {
-            var response = "You need to do a User Post or User Set first";
-            if (string.IsNullOrWhiteSpace(ApiKey))
-            {
-                Console.WriteLine(response);
-                return response;
-            }
+            if (string.IsNullOrWhiteSpace(ApiKey)) return "You need to do a User Post or User Set first";
 
             var httpRequest = new HttpRequestMessage
             {
@@ -218,37 +177,18 @@ namespace DistSysAcwClient.Class
                 Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("ApiKey", ApiKey);
-
             var httpResponse = await Client.SendAsync(httpRequest);
+
+            if (!httpResponse.IsSuccessStatusCode) return "Couldn’t Get the Public Key";
             PublicKey = await httpResponse.Content.ReadAsStringAsync();
-            if (httpResponse.IsSuccessStatusCode)
-            {
-                response = "Got Public Key";
-                Console.WriteLine(response);
-                return response;
-            }
-            else
-            {
-                response = "Couldn’t Get the Public Key";
-                Console.WriteLine(response);
-                return response;
-            }
+            return "Got Public Key";
+
         }
 
         internal static async Task<string> ProtectedSign(string message)
         {
-            var response = "You need to do a User Post or User Set first";
-            if (string.IsNullOrWhiteSpace(ApiKey))
-            {
-                Console.WriteLine(response);
-                return response;
-            }
-            if (string.IsNullOrWhiteSpace(PublicKey))
-            {
-                response = "Client doesn’t yet have the public key";
-                Console.WriteLine(response);
-                return response;
-            }
+            if (string.IsNullOrWhiteSpace(ApiKey)) return "You need to do a User Post or User Set first";
+            if (string.IsNullOrWhiteSpace(PublicKey)) return "Client doesn’t yet have the public key";
 
             var httpRequest = new HttpRequestMessage
             {
@@ -256,84 +196,61 @@ namespace DistSysAcwClient.Class
                 Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("ApiKey", ApiKey);
-
             var httpResponse = await Client.SendAsync(httpRequest);
-            if (httpResponse.IsSuccessStatusCode)
-            {
-                var signedHexMessage = await httpResponse.Content.ReadAsStringAsync();
 
-                var originalMessageBytes = Encoding.ASCII.GetBytes(message);
-                var signedBytes = Converters.HexStringToBytes(signedHexMessage);
+            if (!httpResponse.IsSuccessStatusCode) return "Message was not successfully signed";
 
-                var verified = RsaCsp.Verify(PublicKey, originalMessageBytes, signedBytes);
+            var signedHexMessage = await httpResponse.Content.ReadAsStringAsync();
 
-                if (verified)
-                {
-                    response = "Message was successfully signed";
-                    Console.WriteLine(response);
-                    return response;
-                }
-            }
+            var originalMessageBytes = Encoding.ASCII.GetBytes(message);
+            var signedBytes = Converters.HexStringToBytes(signedHexMessage);
 
-            response = "Message was not successfully signed";
-            Console.WriteLine(response);
-            return response;
+            var verified = RsaCsp.Verify(PublicKey, originalMessageBytes, signedBytes);
+
+            return verified ? "Message was successfully signed" : "Message was not successfully signed";
         }
 
         internal static async Task<string> ProtectedAddFifty(string stringInt)
         {
-            var response = "You need to do a User Post or User Set first";
-            if (string.IsNullOrWhiteSpace(ApiKey))
-            {
-                Console.WriteLine(response);
-                return response;
-            }
-            if (string.IsNullOrWhiteSpace(PublicKey))
-            {
-                response = "Client doesn’t yet have the public key";
-                Console.WriteLine(response);
-                return response;
-            }
-            
-            // Get newly generated Aes info (key and IV) and int as bytes, add to a list.
+            if (string.IsNullOrWhiteSpace(ApiKey)) return "You need to do a User Post or User Set first";
+            if (string.IsNullOrWhiteSpace(PublicKey)) return "Client doesn’t yet have the public key";
+
+            // Get newly generated Aes info (key and IV).
             var bytesToEncrypt = AesProvider.GetAesInfo();
+
+            // Get int as bytes, add to a list.
             bytesToEncrypt.Add(Encoding.ASCII.GetBytes(stringInt));
 
             // Encrypt the data in the list with RSA public key from server.
             var encryptedList = RsaCsp.EncryptList(PublicKey, bytesToEncrypt);
+            if(encryptedList is null) return "An error occurred!";
 
-            // Get the string of the encrypted data and assign to respective values.
-            var encryptedHexSymKey = BitConverter.ToString(encryptedList[0]);
-            var encryptedHexIv = BitConverter.ToString(encryptedList[1]);
-            var encryptedHexInteger = BitConverter.ToString(encryptedList[2]);
-            
+            // Get the hex string of the encrypted data and assign to respective values.
+            var encryptedHexSymKey = BitConverter.ToString(encryptedList[0]); // Key
+            var encryptedHexIv = BitConverter.ToString(encryptedList[1]); // IV
+            var encryptedHexInteger = BitConverter.ToString(encryptedList[2]); // Integer
+
             var httpRequest = new HttpRequestMessage
             {
-                RequestUri = new Uri($"{BaseDomain}api/protected/addfifty?encryptedInteger={encryptedHexInteger}&encryptedSymKey={encryptedHexSymKey}&encryptedIV={encryptedHexIv}"),
+                RequestUri =
+                    new Uri(
+                        $"{BaseDomain}api/protected/addfifty?encryptedInteger={encryptedHexInteger}&encryptedsymkey={encryptedHexSymKey}&encryptedIV={encryptedHexIv}"),
                 Method = HttpMethod.Get
             };
             httpRequest.Headers.Add("ApiKey", ApiKey);
 
+            // Message never sends as it is too large!!!!!!! 
+            // 404.15 query string is too large.
+            // Pretty sure everything else should work.
             var httpResponse = await Client.SendAsync(httpRequest);
-            if (httpResponse.IsSuccessStatusCode)
-            {
-                var aesEncryptedHexInteger = await httpResponse.Content.ReadAsStringAsync();
-                
-                var aesEncryptedInteger = Converters.HexStringToBytes(aesEncryptedHexInteger);
 
-                var decryptedInteger = AesProvider.Decrypt(bytesToEncrypt[0], bytesToEncrypt[1], aesEncryptedInteger);
+            if (!httpResponse.IsSuccessStatusCode) return "An error occurred!";
 
-                if (decryptedInteger != null)
-                {
-                    response = decryptedInteger;
-                    Console.WriteLine(response);
-                    return response;
-                }
-            }
+            var aesEncryptedHexInteger = await httpResponse.Content.ReadAsStringAsync();
+            var aesEncryptedInteger = Converters.HexStringToBytes(aesEncryptedHexInteger);
+            var decryptedInteger = AesProvider.Decrypt(bytesToEncrypt[0], bytesToEncrypt[1], aesEncryptedInteger);
 
-            response = "An error occurred!";
-            Console.WriteLine(response);
-            return response;
+            return decryptedInteger ?? "An error occurred!";
         }
     }
 }

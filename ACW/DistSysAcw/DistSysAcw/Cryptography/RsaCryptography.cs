@@ -1,9 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using System.Xml.Serialization;
-using Exception = System.Exception;
 
 namespace DistSysAcw.Cryptography
 {
@@ -15,15 +12,16 @@ namespace DistSysAcw.Cryptography
         // Singleton RSA instance.
         private static RsaCryptography _rsaInstance;
 
-        // Stores the public and private keys.
-        private readonly RSAParameters _rsaParams;
-        
         // To tell csp instances to use the machine key store instead of the user profile key store.
         private static CspParameters _cspParams;
 
         // Lock object that will be used to synchronise threads during first access to the Singleton.
         private static readonly object Lock = new object();
-        
+
+        // Stores the public and private keys.
+        private readonly RSAParameters _rsaParams;
+
+        // Removed key size as having issue sending lots of data in URI query, AddFifty.
         // Private to prevent new construction calls.
         private RsaCryptography()
         {
@@ -34,11 +32,12 @@ namespace DistSysAcw.Cryptography
                 Flags = CspProviderFlags.UseMachineKeyStore
             };
             // Use new instance of RSACryptoServiceProvider to generate public and private key data.
-            using var rsa = new RSACryptoServiceProvider(2048, _cspParams);
+            using var
+                rsa = new RSACryptoServiceProvider(//2048, // Larger key sizes take longer but are more secure.
+                    _cspParams); 
             // True exports public and private keys, false just exports public.
             _rsaParams = rsa.ExportParameters(true);
         }
-
 
 
         // Get singleton instance.
@@ -53,6 +52,7 @@ namespace DistSysAcw.Cryptography
                 // Because multiple can get through first check, we have to check again.
                 _rsaInstance ??= new RsaCryptography();
             }
+
             return _rsaInstance;
         }
 
@@ -64,40 +64,36 @@ namespace DistSysAcw.Cryptography
                 rsa.ImportParameters(_rsaParams);
                 return rsa.ToXmlString(false);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e);
                 return null;
             }
-
         }
 
-        public string Encrypt(string plainText)
+        public byte[] Encrypt(byte[] plainText)
         {
             try
             {
                 using var rsa = new RSACryptoServiceProvider(_cspParams);
                 rsa.ImportParameters(_rsaParams);
-                return Encoding.Unicode.GetString(rsa.Encrypt(Encoding.Unicode.GetBytes(plainText), false));
+                return rsa.Encrypt(plainText, false);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e.Message);
                 return null;
             }
         }
 
-        public string Decrypt(string cypherText)
+        public byte[] Decrypt(byte[] cypherText)
         {
             try
             {
                 using var rsa = new RSACryptoServiceProvider(_cspParams);
                 rsa.ImportParameters(_rsaParams);
-                return Encoding.Unicode.GetString(rsa.Decrypt(Encoding.Unicode.GetBytes(cypherText), false));
+                return rsa.Decrypt(cypherText, false);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e.Message);
                 return null;
             }
         }
@@ -110,39 +106,41 @@ namespace DistSysAcw.Cryptography
                 rsa.ImportParameters(_rsaParams);
                 // Computes the hash value of the specified byte array using the specified hash algorithm, and signs the resulting hash value.
                 // Then converts it to Hex.
-                return BitConverter.ToString(rsa.SignData(Encoding.ASCII.GetBytes(message), CryptoConfig.CreateFromName("SHA1")));
+                return BitConverter.ToString(rsa.SignData(Encoding.ASCII.GetBytes(message),
+                    CryptoConfig.CreateFromName("SHA1")));
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e.Message);
                 return null;
             }
         }
 
-        public string AddFifty(string encryptedInteger, string encryptedSymkey, string encryptedIv)
+        #region TASK14
+        public string AddFifty(string encryptedHexInteger, string encryptedHexSymkey, string encryptedHexIv)
         {
-            var encryptedIntegerBytes = Converters.HexStringToBytes(encryptedInteger);
-            var encryptedSymkeyBytes = Converters.HexStringToBytes(encryptedSymkey);
-            var encryptedIvBytes = Converters.HexStringToBytes(encryptedIv);
+            // Remove Hex encoding to get RSA encrypted strings.
+            var encryptedIntegerBytes = Converters.HexStringToBytes(encryptedHexInteger);
+            var encryptedSymkeyBytes = Converters.HexStringToBytes(encryptedHexSymkey);
+            var encryptedIvBytes = Converters.HexStringToBytes(encryptedHexIv);
 
-            var decryptedInteger = Decrypt(Encoding.ASCII.GetString(encryptedIntegerBytes));
-            var decryptedSymkey = Decrypt(Encoding.ASCII.GetString(encryptedSymkeyBytes));
-            var decryptedIv = Decrypt(Encoding.ASCII.GetString(encryptedIvBytes));
+            // Decrypt RSA encrypted strings.
+            var decryptedInteger = Decrypt(encryptedIntegerBytes);
+            var decryptedSymkey = Decrypt(encryptedSymkeyBytes);
+            var decryptedIv = Decrypt(encryptedIvBytes);
+            if (decryptedInteger is null || decryptedSymkey is null || decryptedIv is null) return null;
 
-            try
-            {
-                using var myAes = Aes.Create();
-                myAes.Key = Encoding.ASCII.GetBytes(decryptedSymkey);
-                myAes.IV = Encoding.ASCII.GetBytes(decryptedIv);
-                // Encrypt with aes - then hex encode and send back.
+            // Get int and add fifty.
+            int.TryParse(Encoding.ASCII.GetString(decryptedInteger), out var integer);
+            integer += 50;
 
-                return null;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return null;
-            }
+            // Aes encrypt integer using provided Key and IV.
+            var aesInt = AesCryptography.Encrypt(integer.ToString(), decryptedSymkey, decryptedIv);
+            if (aesInt is null) return null;
+
+            // Hex encode and return.
+            return BitConverter.ToString(aesInt);
         }
+
+        #endregion
     }
 }

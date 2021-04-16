@@ -4,12 +4,13 @@
     // In it's own class to decouple.
     internal class ChangeRole
     {
-        public string Username { get; set; }
-        public string Role { get; set; }
         public ChangeRole(string userName, string role)
         {
             Username = userName;
             Role = role;
         }
+
+        public string Username { get; set; }
+        public string Role { get; set; }
     }
 }

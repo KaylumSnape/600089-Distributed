@@ -7,8 +7,6 @@ namespace DistSysAcw.Models
     * updating, deleting in the BD, as well as managing data relationships. */
     public class UserContext : DbContext
     {
-        public UserContext() : base() { }
-
         // DbSets to map.
         // LINQ queries against this object can be translated to a query ran on the DB.
         public DbSet<User> Users { get; set; }

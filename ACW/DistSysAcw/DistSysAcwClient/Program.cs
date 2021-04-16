@@ -1,9 +1,11 @@
-﻿using DistSysAcwClient.Class;
-using System;
+﻿using System;
+using System.Text;
+using DistSysAcwClient.Class;
 
 namespace DistSysAcwClient
 {
     #region Task 10 and beyond
+
     internal class Client
     {
         private static void Main()
@@ -14,143 +16,191 @@ namespace DistSysAcwClient
 
             while (userInput?.ToLower() != "exit")
             {
+                var response = string.Empty;
                 try
                 {
                     var splitInput = userInput?.Split(' ');
 
-                    switch (splitInput) // Originally userInput
+                    switch (splitInput)
                     {
                         case { } a when a[0].ToLower() == "talkback" && a[1].ToLower() == "hello":
-                            {
-                                Console.WriteLine("...please wait...");
-                                Tasks.TalkBackHello().Wait();
-                            }
+                        {
+                            Console.WriteLine("...please wait...");
+                            response = Tasks.TalkBackHello().Result;
+                        }
                             break;
 
                         case { } a when a[0].ToLower() == "talkback" && a[1].ToLower() == "sort":
+                        {
+                            if (splitInput.Length != 3)
                             {
-                                var integers = splitInput[2].Replace("[", "&integers=")
-                                    .Replace("]", "")
-                                    .Replace(",", "&integers=");
-
-                                Console.WriteLine("...please wait...");
-                                Tasks.TalkBackSort(integers).Wait();
+                                response = "Please enter a array of integers to sort, e.g. [5,4,2,1]";
+                                break;
                             }
+
+                            var integers = splitInput[2].Replace("[", "&integers=")
+                                .Replace("]", "")
+                                .Replace(",", "&integers=");
+
+                            Console.WriteLine("...please wait...");
+                            Tasks.TalkBackSort(integers).Wait();
+                        }
                             break;
 
                         case { } a when a[0].ToLower() == "user" && a[1].ToLower() == "get":
+                        {
+                            if (splitInput.Length != 3)
                             {
-                                Console.WriteLine("...please wait...");
-                                if (splitInput.Length != 3) // Added this functionality so client response is same as server.
-                                {
-                                    throw new Exception("False - User Does Not Exist! Did you mean to do a POST to create a new user?");
-                                }
-                                Tasks.UserGet(splitInput[2]).Wait();
+                                response = "Please enter a username.";
+                                break;
                             }
+
+                            Console.WriteLine("...please wait...");
+                            response = Tasks.UserGet(splitInput[2]).Result;
+                        }
                             break;
 
                         case { } a when a[0].ToLower() == "user" && a[1].ToLower() == "post":
+                        {
+                            if (splitInput.Length != 3)
                             {
-                                Console.WriteLine("...please wait...");
-                                if (splitInput.Length != 3)
-                                {
-                                    throw new Exception("Oops. Make sure your body contains a string with your username and your Content-Type is Content-Type:application/json");
-                                }
-                                Tasks.UserPost(splitInput[2]).Wait();
+                                response = "Please enter a username.";
+                                break;
                             }
+
+                            Console.WriteLine("...please wait...");
+                            response = Tasks.UserPost(splitInput[2]).Result;
+                        }
                             break;
 
                         case { } a when a[0].ToLower() == "user" && a[1].ToLower() == "set":
+                        {
+                            if (splitInput.Length != 4)
                             {
-                                Console.WriteLine("...please wait...");
-                                Tasks.UserSet(splitInput[2], splitInput[3]);
+                                response = "Please enter a username and api key.";
+                                break;
                             }
+
+                            Console.WriteLine("...please wait...");
+                            Tasks.UserSet(splitInput[2], splitInput[3]);
+                            response = "Stored";
+                        }
                             break;
 
                         case { } a when a[0].ToLower() == "user" && a[1].ToLower() == "delete":
-                            {
-                                Console.WriteLine("...please wait...");
-                                Tasks.UserDelete().Wait();
-                            }
+                        {
+                            Console.WriteLine("...please wait...");
+                            response = Tasks.UserDelete().Result.ToString();
+                        }
                             break;
 
                         case { } a when a[0].ToLower() == "user" && a[1].ToLower() == "role":
+                        {
+                            if (splitInput.Length != 4)
                             {
-                                Console.WriteLine("...please wait...");
-                                Tasks.ChangeUserRole(splitInput[2], splitInput[3]).Wait();
+                                response = "Please enter a username and role.";
+                                break;
                             }
+
+                            Console.WriteLine("...please wait...");
+                            response = Tasks.ChangeUserRole(splitInput[2], splitInput[3]).Result;
+                        }
                             break;
 
                         case { } a when a[0].ToLower() == "protected" && a[1].ToLower() == "hello":
-                            {
-                                Console.WriteLine("...please wait...");
-                                Tasks.ProtectedHello().Wait();
-                            }
+                        {
+                            Console.WriteLine("...please wait...");
+                            response = Tasks.ProtectedHello().Result;
+                        }
                             break;
 
                         case { } a when a[0].ToLower() == "protected" && a[1].ToLower() == "sha1":
+                        {
+                            if (splitInput.Length < 3)
                             {
-                                Console.WriteLine("...please wait...");
-                                if (splitInput.Length != 3)
-                                {
-                                    throw new Exception("Bad Request");
-                                }
-                                Tasks.ProtectedSha1(splitInput[2]).Wait();
+                                response = "Please provide a message.";
+                                break;
                             }
+
+                            // What happens when the message contain spaces!!
+                            // Will the message contain spaces?
+                            // Do the spaces need to be escaped?!
+                            var message = new StringBuilder();
+                            for (var i = 2; i < splitInput.Length; i++) message.Append(splitInput[i]).Append(" ");
+
+                            Console.WriteLine("...please wait...");
+                            response = Tasks.ProtectedSha1(message.ToString().Trim()).Result;
+                        }
                             break;
 
                         case { } a when a[0].ToLower() == "protected" && a[1].ToLower() == "sha256":
+                        {
+                            if (splitInput.Length < 3)
                             {
-                                Console.WriteLine("...please wait...");
-                                if (splitInput.Length != 3)
-                                {
-                                    throw new Exception("Bad Request");
-                                }
-                                Tasks.ProtectedSha256(splitInput[2]).Wait();
+                                response = "Please provide a message.";
+                                break;
                             }
+
+                            var message = new StringBuilder();
+                            for (var i = 2; i < splitInput.Length; i++) message.Append(splitInput[i]).Append(" ");
+
+                            Console.WriteLine("...please wait...");
+                            response = Tasks.ProtectedSha256(message.ToString().Trim()).Result;
+                        }
                             break;
 
-                        case { } a when a[0].ToLower() == "protected" && a[1].ToLower() == "get" && a[2].ToLower() == "publickey":
-                            {
-                                Console.WriteLine("...please wait...");
-                                Tasks.GetPublicKey().Wait();
-                            }
+                        case { } a when a[0].ToLower() == "protected" && a[1].ToLower() == "get" &&
+                                        a[2].ToLower() == "publickey":
+                        {
+                            Console.WriteLine("...please wait...");
+                            response = Tasks.GetPublicKey().Result;
+                        }
                             break;
 
                         case { } a when a[0].ToLower() == "protected" && a[1].ToLower() == "sign":
+                        {
+                            if (splitInput.Length < 3)
                             {
-                                Console.WriteLine("...please wait...");
-                                if (splitInput.Length != 3)
-                                {
-                                    throw new Exception("Please enter a message to be signed.");
-                                }
-                                Tasks.ProtectedSign(splitInput[2]).Wait();
+                                response = "Please provide a message.";
+                                break;
                             }
+
+                            var message = new StringBuilder();
+                            for (var i = 2; i < splitInput.Length; i++) message.Append(splitInput[i]).Append(" ");
+
+                            Console.WriteLine("...please wait...");
+                            response = Tasks.ProtectedSign(message.ToString().Trim()).Result;
+                        }
                             break;
 
                         case { } a when a[0].ToLower() == "protected" && a[1].ToLower() == "addfifty":
                         {
-                            Console.WriteLine("...please wait...");
                             if (splitInput.Length != 3)
                             {
-                                throw new Exception("Please enter a message to be signed.");
-                            }
-                            
-                            if (!int.TryParse(splitInput[2], out var o))
-                            {
-                                throw new Exception("A valid integer must be given!");
+                                response = "Please provide a message.";
+                                break;
                             }
 
-                            Tasks.ProtectedAddFifty(splitInput[2]).Wait();
+                            if (!int.TryParse(splitInput[2], out var o))
+                            {
+                                response = "A valid integer must be given!";
+                                break;
+                            }
+
+                            Console.WriteLine("...please wait...");
+                            response = Tasks.ProtectedAddFifty(splitInput[2]).Result;
                         }
                             break;
 
                         default:
-                            {
-                                Console.WriteLine("Command not recognised.");
-                            }
+                        {
+                            Console.WriteLine("Command not recognised.");
+                        }
                             break;
                     }
+
+                    if (string.IsNullOrWhiteSpace(response)) break;
+                    Console.WriteLine(response);
                 }
                 catch (Exception e)
                 {
@@ -161,8 +211,10 @@ namespace DistSysAcwClient
                 userInput = Console.ReadLine();
                 Console.Clear();
             }
+
             Environment.Exit(1);
         }
     }
+
     #endregion
 }

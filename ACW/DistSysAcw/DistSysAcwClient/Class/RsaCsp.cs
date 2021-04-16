@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using System.Text;
 
 namespace DistSysAcwClient.Class
 {
@@ -33,7 +32,7 @@ namespace DistSysAcwClient.Class
         // Tricky to keep track of what byte[] is what value, should probably change this but, this way is less code.
         public static List<byte[]> EncryptList(string publicKey, List<byte[]> bytesToEncrypt)
         {
-            var encryptedBytes= new List<byte[]>();
+            var encryptedBytes = new List<byte[]>();
             try
             {
                 using var rsa = new RSACryptoServiceProvider();
@@ -42,9 +41,8 @@ namespace DistSysAcwClient.Class
                 encryptedBytes.Add(rsa.Encrypt(bytesToEncrypt[1], false)); // Aes IV.
                 encryptedBytes.Add(rsa.Encrypt(bytesToEncrypt[2], false)); // Integer.
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e.Message);
                 return null;
             }
 
@@ -59,9 +57,8 @@ namespace DistSysAcwClient.Class
                 rsa.FromXmlString(publicKey); // Initializes an RSA object from the key information from an XML string.
                 return rsa.Encrypt(bytesToEncrypt, false);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e.Message);
                 return null;
             }
         }

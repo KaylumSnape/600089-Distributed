@@ -42,71 +42,65 @@ namespace DistSysAcw.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "LogArchives",
-                columns: table => new
+                "LogArchives",
+                table => new
                 {
-                    LogArchiveId = table.Column<int>(type: "int", nullable: false)
+                    LogArchiveId = table.Column<int>("int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    LogId = table.Column<int>(type: "int", nullable: false),
-                    ApiKey = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LogString = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
-                    LogDateTime = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    LogId = table.Column<int>("int", nullable: false),
+                    ApiKey = table.Column<string>("nvarchar(max)", nullable: false),
+                    LogString = table.Column<string>("nvarchar(300)", maxLength: 300, nullable: false),
+                    LogDateTime = table.Column<DateTime>("datetime2", nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_LogArchives", x => x.LogArchiveId);
-                });
+                constraints: table => { table.PrimaryKey("PK_LogArchives", x => x.LogArchiveId); });
 
             migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
+                "Users",
+                table => new
                 {
-                    ApiKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Role = table.Column<int>(type: "int", maxLength: 20, nullable: false)
+                    ApiKey = table.Column<string>("nvarchar(450)", nullable: false),
+                    UserName = table.Column<string>("nvarchar(50)", maxLength: 50, nullable: false),
+                    Role = table.Column<int>("int", maxLength: 20, nullable: false)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.ApiKey);
-                });
+                constraints: table => { table.PrimaryKey("PK_Users", x => x.ApiKey); });
 
             migrationBuilder.CreateTable(
-                name: "Logs",
-                columns: table => new
+                "Logs",
+                table => new
                 {
-                    LogId = table.Column<int>(type: "int", nullable: false)
+                    LogId = table.Column<int>("int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    LogString = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
-                    LogDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserApiKey = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    LogString = table.Column<string>("nvarchar(300)", maxLength: 300, nullable: false),
+                    LogDateTime = table.Column<DateTime>("datetime2", nullable: false),
+                    UserApiKey = table.Column<string>("nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Logs", x => x.LogId);
                     table.ForeignKey(
-                        name: "FK_Logs_Users_UserApiKey",
-                        column: x => x.UserApiKey,
-                        principalTable: "Users",
-                        principalColumn: "ApiKey",
+                        "FK_Logs_Users_UserApiKey",
+                        x => x.UserApiKey,
+                        "Users",
+                        "ApiKey",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Logs_UserApiKey",
-                table: "Logs",
-                column: "UserApiKey");
+                "IX_Logs_UserApiKey",
+                "Logs",
+                "UserApiKey");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "LogArchives");
+                "LogArchives");
 
             migrationBuilder.DropTable(
-                name: "Logs");
+                "Logs");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                "Users");
         }
     }
 }

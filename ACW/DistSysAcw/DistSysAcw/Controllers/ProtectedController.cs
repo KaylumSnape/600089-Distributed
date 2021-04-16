@@ -1,10 +1,7 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using DistSysAcw.Cryptography;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using DistSysAcw.Cryptography;
 using DistSysAcw.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using static DistSysAcw.Cryptography.ShaCryptography;
 
 namespace DistSysAcw.Controllers
@@ -14,12 +11,13 @@ namespace DistSysAcw.Controllers
         private readonly UserContext _dbContext; // Not to be changed by the controller.
 
         // Pass in UserContext through dependency injection.
-        public ProtectedController(Models.UserContext dbcontext) : base(dbcontext)
+        public ProtectedController(UserContext dbcontext) : base(dbcontext)
         {
             _dbContext = dbcontext;
         }
-
+        
         #region TASK9
+
         // api/protected/hello
         [HttpGet]
         [ActionName("Hello")]
@@ -43,10 +41,7 @@ namespace DistSysAcw.Controllers
             UserDatabaseAccess.LogAction(_dbContext, user,
                 $"{user.UserName} requested /protected/sha1.");
 
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                return BadRequest("Bad Request");
-            }
+            if (string.IsNullOrWhiteSpace(message)) return BadRequest("Bad Request");
             return Ok(Sha1Encrypt(message));
         }
 
@@ -60,15 +55,14 @@ namespace DistSysAcw.Controllers
             UserDatabaseAccess.LogAction(_dbContext, user,
                 $"{user.UserName} requested /protected/sha256.");
 
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                return BadRequest("Bad Request");
-            }
+            if (string.IsNullOrWhiteSpace(message)) return BadRequest("Bad Request");
             return Ok(Sha256Encrypt(message));
         }
+
         #endregion
 
         #region TASK11
+
         // api/protected/getpublickey
         [HttpGet]
         [ActionName("GetPublicKey")]
@@ -78,18 +72,17 @@ namespace DistSysAcw.Controllers
             var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
             UserDatabaseAccess.LogAction(_dbContext, user,
                 $"{user.UserName} requested /protected/getpublickey.");
-            
+
             var rsa = RsaCryptography.GetRsaInstance();
             var publicKey = rsa.GetPublicKey();
-            if (publicKey is null)
-            {
-                return BadRequest("Couldn’t Get the Public Key");
-            }
+            if (publicKey is null) return BadRequest("Couldn’t Get the Public Key");
             return Ok(publicKey);
         }
+
         #endregion
 
         #region TASK12
+
         // api/protected/sign
         [HttpGet]
         [ActionName("Sign")]
@@ -100,49 +93,42 @@ namespace DistSysAcw.Controllers
             UserDatabaseAccess.LogAction(_dbContext, user,
                 $"{user.UserName} requested /protected/sign.");
 
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                return BadRequest();
-            }
+            if (string.IsNullOrWhiteSpace(message)) return BadRequest();
 
             var rsa = RsaCryptography.GetRsaInstance();
             var signed = rsa.Sign(message);
-            if (signed is null)
-            {
-                return BadRequest();
-            }
+            if (signed is null) return BadRequest();
 
             return Ok(signed);
         }
+
         #endregion
 
         #region TASK14
+
         // api/protected/addfifty
         [HttpGet]
         [ActionName("AddFifty")]
-        [Authorize(Roles = "Admin")]
-        public ActionResult AddFifty([FromHeader] string apiKey, [FromQuery] string encryptedInteger, [FromQuery] string encryptedSymKey, [FromQuery] string encryptedIV)
+        //[Authorize(Roles = "Admin")]
+        public ActionResult AddFifty([FromHeader] string apiKey, [FromQuery] string encryptedInteger,
+            [FromQuery] string encryptedsymkey, [FromQuery] string encryptedIV)
         {
             var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
             UserDatabaseAccess.LogAction(_dbContext, user,
                 $"{user.UserName} requested /protected/addfifty.");
 
             if (string.IsNullOrWhiteSpace(encryptedInteger) ||
-                string.IsNullOrWhiteSpace(encryptedSymKey) ||
+                string.IsNullOrWhiteSpace(encryptedsymkey) ||
                 string.IsNullOrWhiteSpace(encryptedIV))
-            {
                 return BadRequest();
-            }
 
             var rsa = RsaCryptography.GetRsaInstance();
-            var addFifty = rsa.AddFifty(encryptedInteger, encryptedSymKey, encryptedIV);
-            if (addFifty is null)
-            {
-                return BadRequest();
-            }
+            var addFifty = rsa.AddFifty(encryptedInteger, encryptedsymkey, encryptedIV);
+            if (addFifty is null) return BadRequest();
 
             return Ok(addFifty);
         }
+
         #endregion
     }
 }
