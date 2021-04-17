@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,13 +9,11 @@ namespace DistSysAcwClient.Class
 {
     internal class Tasks
     {
-        private const string BaseDomain = "https://localhost:44394/";
         //private const string BaseDomain = "http://150.237.94.9/2839013/"; // http://150.237.94.9/2839013/Api/Other/Clear
+        private const string BaseDomain = "https://localhost:44394/";
         private static readonly HttpClient Client = new HttpClient();
 
         public static string UserName = string.Empty;
-
-        //public static string ApiKey = "8cd9a4d8-a93c-4096-92e6-15c5b7ce25eb"; // Local.
         public static string ApiKey = string.Empty;
         public static string PublicKey = string.Empty;
 
@@ -30,23 +29,26 @@ namespace DistSysAcwClient.Class
             return responseString;
         }
 
-        internal static async Task<int[]> TalkBackSort(string integers)
+        internal static async Task<string> TalkBackSort(string integers)
         {
+            if (!string.IsNullOrEmpty(integers))
+            {
+                integers = "&integers=" + integers;
+            }
             var httpRequest = new HttpRequestMessage
             {
                 RequestUri = new Uri($"{BaseDomain}api/talkback/sort?{integers}"),
                 Method = HttpMethod.Get
             };
             var httpResponse = await Client.SendAsync(httpRequest);
+            
+            return await httpResponse.Content.ReadAsStringAsync();
 
-            var responseString = await httpResponse.Content.ReadAsStringAsync();
-            Console.WriteLine(responseString);
-
-            var integerArray = Array.ConvertAll(responseString
-                .Replace("[", "")
-                .Replace("]", "")
-                .Split(','), int.Parse);
-            return integerArray;
+            //var integerArray = Array.ConvertAll(responseString
+            //    .Replace("[", "")
+            //    .Replace("]", "")
+            //    .Split(','), int.Parse);
+            //return integerArray;
         }
 
         internal static async Task<string> UserGet(string userName)
@@ -100,8 +102,8 @@ namespace DistSysAcwClient.Class
             };
             httpRequest.Headers.Add("ApiKey", ApiKey);
             var httpResponse = await Client.SendAsync(httpRequest);
-
-            return httpResponse.IsSuccessStatusCode;
+            var content = await httpResponse.Content.ReadAsStringAsync();
+            return content.ToLower().Contains("true");
         }
 
         internal static async Task<string> ChangeUserRole(string userName, string role)

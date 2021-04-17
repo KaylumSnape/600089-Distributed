@@ -42,7 +42,7 @@ namespace DistSysAcw.Controllers
             }
             catch (Exception) // If submitted values are invalid, such as a char.
             {
-                return BadRequest();
+                return BadRequest("BadRequest");
             }
         }
 

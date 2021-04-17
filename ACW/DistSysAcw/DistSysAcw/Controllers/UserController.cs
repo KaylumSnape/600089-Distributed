@@ -63,7 +63,12 @@ namespace DistSysAcw.Controllers
             UserDatabaseAccess.LogAction(_dbContext, user,
                 $"/user/removeuser called for {user.UserName}.");
 
-            return Ok(UserDatabaseAccess.DeleteUser(_dbContext, apiKey, username));
+            if (UserDatabaseAccess.DeleteUser(_dbContext, apiKey, username))
+            {
+                return Ok("True");
+            }
+
+            return Ok("False");
         }
 
         #endregion

@@ -32,18 +32,18 @@ namespace DistSysAcwClient
 
                         case { } a when a[0].ToLower() == "talkback" && a[1].ToLower() == "sort":
                         {
-                            if (splitInput.Length != 3)
+                            if (splitInput.Length < 3)
                             {
                                 response = "Please enter a array of integers to sort, e.g. [5,4,2,1]";
                                 break;
                             }
 
-                            var integers = splitInput[2].Replace("[", "&integers=")
+                            var integers = splitInput[2].Replace("[", "")
                                 .Replace("]", "")
                                 .Replace(",", "&integers=");
 
                             Console.WriteLine("...please wait...");
-                            Tasks.TalkBackSort(integers).Wait();
+                            response = Tasks.TalkBackSort(integers).Result;
                         }
                             break;
 

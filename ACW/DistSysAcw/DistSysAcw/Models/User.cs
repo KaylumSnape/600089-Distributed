@@ -147,7 +147,7 @@ namespace DistSysAcw.Models
             if (username != null)
                 user = dbContext.Users
                     .Include(u => u.Logs)
-                    .FirstOrDefault(u => u.UserName == username);
+                    .FirstOrDefault(u => u.UserName == username);// Doesn't match case for some reason when doing change role.
 
             return user;
         }
