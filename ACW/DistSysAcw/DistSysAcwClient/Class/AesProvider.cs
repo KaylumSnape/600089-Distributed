@@ -12,6 +12,9 @@ namespace DistSysAcwClient.Class
         {
             // Create a new instance of the Aes class.
             using var myAes = Aes.Create();
+            myAes.GenerateKey();
+            myAes.GenerateIV();
+
             var aesInfo = new List<byte[]>
             {
                 myAes.Key,

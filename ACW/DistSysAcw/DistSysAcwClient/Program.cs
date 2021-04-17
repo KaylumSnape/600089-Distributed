@@ -177,7 +177,7 @@ namespace DistSysAcwClient
                         {
                             if (splitInput.Length != 3)
                             {
-                                response = "Please provide a message.";
+                                response = "Please provide a number.";
                                 break;
                             }
 
@@ -199,8 +199,10 @@ namespace DistSysAcwClient
                             break;
                     }
 
-                    if (string.IsNullOrWhiteSpace(response)) break;
-                    Console.WriteLine(response);
+                    if (!string.IsNullOrWhiteSpace(response))
+                    {
+                        Console.WriteLine(response);
+                    }
                 }
                 catch (Exception e)
                 {

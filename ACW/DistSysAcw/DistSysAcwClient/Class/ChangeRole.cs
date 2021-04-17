@@ -6,11 +6,11 @@
     {
         public ChangeRole(string userName, string role)
         {
-            Username = userName;
-            Role = role;
+            username = userName;
+            this.role = role;
         }
 
-        public string Username { get; set; }
-        public string Role { get; set; }
+        public string username { get; set; }
+        public string role { get; set; }
     }
 }
