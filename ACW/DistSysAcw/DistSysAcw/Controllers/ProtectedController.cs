@@ -109,21 +109,21 @@ namespace DistSysAcw.Controllers
         // api/protected/addfifty
         [HttpGet]
         [ActionName("AddFifty")]
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public ActionResult AddFifty([FromHeader] string apiKey, [FromQuery] string encryptedInteger,
-            [FromQuery] string encryptedsymkey, [FromQuery] string encryptedIV)
+            [FromQuery] string encryptedSymKey, [FromQuery] string encryptedIV)
         {
             var user = UserDatabaseAccess.GetUser(_dbContext, apiKey, null);
             UserDatabaseAccess.LogAction(_dbContext, user,
                 $"{user.UserName} requested /protected/addfifty.");
 
             if (string.IsNullOrWhiteSpace(encryptedInteger) ||
-                string.IsNullOrWhiteSpace(encryptedsymkey) ||
+                string.IsNullOrWhiteSpace(encryptedSymKey) ||
                 string.IsNullOrWhiteSpace(encryptedIV))
                 return BadRequest();
 
             var rsa = RsaCryptography.GetRsaInstance();
-            var addFifty = rsa.AddFifty(encryptedInteger, encryptedsymkey, encryptedIV);
+            var addFifty = rsa.AddFifty(encryptedInteger, encryptedSymKey, encryptedIV);
             if (addFifty is null) return BadRequest();
 
             return Ok(addFifty);

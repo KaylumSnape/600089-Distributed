@@ -221,7 +221,8 @@ namespace DistSysAcwClient.Class
             var bytesToEncrypt = AesProvider.GetAesInfo();
 
             // Get int as bytes, add to a list.
-            bytesToEncrypt.Add(Encoding.ASCII.GetBytes(stringInt));
+            int.TryParse(stringInt, out var integer);
+            bytesToEncrypt.Add(BitConverter.GetBytes(integer));
 
             // Encrypt the data in the list with RSA public key from server.
             var encryptedList = RsaCsp.EncryptList(PublicKey, bytesToEncrypt);
@@ -241,9 +242,6 @@ namespace DistSysAcwClient.Class
             };
             httpRequest.Headers.Add("ApiKey", ApiKey);
 
-            // Message never sends as it is too large!!!!!!! 
-            // 404.15 query string is too large.
-            // Pretty sure everything else should work.
             var httpResponse = await Client.SendAsync(httpRequest);
 
             if (!httpResponse.IsSuccessStatusCode) return "An error occurred!";

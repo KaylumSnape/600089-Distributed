@@ -28,13 +28,11 @@ namespace DistSysAcw.Cryptography
             // Use the machine key store instead of the user profile key store.
             _cspParams = new CspParameters
             {
-                KeyContainerName = "MyKeyContainer",
+                KeyContainerName = "DisSysKeyContainer",
                 Flags = CspProviderFlags.UseMachineKeyStore
             };
             // Use new instance of RSACryptoServiceProvider to generate public and private key data.
-            using var
-                rsa = new RSACryptoServiceProvider(//2048, // Larger key sizes take longer but are more secure.
-                    _cspParams); 
+            using var rsa = new RSACryptoServiceProvider(_cspParams) {KeySize = 1024};
             // True exports public and private keys, false just exports public.
             _rsaParams = rsa.ExportParameters(true);
         }
@@ -130,7 +128,7 @@ namespace DistSysAcw.Cryptography
             if (decryptedInteger is null || decryptedSymkey is null || decryptedIv is null) return null;
 
             // Get int and add fifty.
-            int.TryParse(Encoding.ASCII.GetString(decryptedInteger), out var integer);
+            var integer = BitConverter.ToInt32(decryptedInteger, 0);
             integer += 50;
 
             // Aes encrypt integer using provided Key and IV.
